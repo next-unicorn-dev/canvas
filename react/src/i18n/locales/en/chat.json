@@ -1,0 +1,63 @@
+{
+  "newChat": "New Chat",
+  "placeholder": "Type your message here...",
+  "insufficientBalance": "Insufficient Balance",
+  "insufficientBalanceDescription": "Your credits are depleted. Please recharge to continue.",
+  "textarea": {
+    "placeholder": "Enter your design requirements",
+    "selectModel": "Please select a text model! Go to Settings to set your API keys if you haven't done so.",
+    "selectTool": "Please go to settings to add image or video generation tools, or you won't be able to generate any images or videos!!",
+    "enterPrompt": "Please enter a prompt",
+    "quantity": "Image Quantity",
+    "useBrandInfo": "My Brand",
+    "brandInfoError": "Failed to load brand information",
+    "noBrandInfo": "No brand information found. Please set up your brand information in \"My Brand Analysis\" first."
+  },
+  "messages": {
+    "imagePositioning": "Go to image",
+    "showMore": "Show More",
+    "showLess": "Show Less"
+  },
+  "thinking": {
+    "title": "Thinking"
+  },
+  "plan": {
+    "title": "Plan",
+    "steps": {
+      "singular": "step",
+      "plural": "steps"
+    }
+  },
+  "shareTemplate": {
+    "title": "Share as Template",
+    "templateName": "Template Name",
+    "templateNamePlaceholder": "Enter template name...",
+    "coverPhoto": "Cover Photo",
+    "noImagesFound": "No images found in canvas",
+    "nameRequired": "Template name is required",
+    "coverImageRequired": "Cover image is required",
+    "create": "Create Template",
+    "creating": "Creating...",
+    "success": "Template created successfully!",
+    "error": "Failed to create template"
+  },
+  "modelSelector": {
+    "title": "Model",
+    "auto": "Auto",
+    "tabs": {
+      "image": "Image",
+      "video": "Video",
+      "text": "Text"
+    }
+  },
+  "toolCall": {
+    "requiresConfirmation": "Needs Confirmation",
+    "cancelled": "Cancelled",
+    "confirm": "Confirm",
+    "cancel": "Cancel"
+  },
+  "emptyState": {
+    "title": "Hello We are prism AI",
+    "subtitle": "How can I help you today?"
+  }
+}

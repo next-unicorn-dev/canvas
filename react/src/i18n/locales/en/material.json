@@ -1,0 +1,38 @@
+{
+  "buttons": {
+    "preview": "Preview",
+    "addToChat": "Add to Chat",
+    "zoomOut": "Zoom Out",
+    "resetZoom": "Reset Zoom",
+    "zoomIn": "Zoom In",
+    "fileInfo": "File Info",
+    "copyPath": "Copy Path",
+    "download": "Download",
+    "addToFavorites": "Add to Favorites"
+  },
+  "search": {
+    "placeholder": "Search files..."
+  },
+  "filePreview": {
+    "loading": "Loading...",
+    "loadFailed": "Load failed",
+    "imageLoadFailed": "Image load failed",
+    "videoLoadFailed": "Video load failed",
+    "fileInfo": "File Info",
+    "fileName": "File Name",
+    "fileSize": "File Size",
+    "fileType": "File Type",
+    "createdAt": "Created At",
+    "modifiedAt": "Modified At"
+  }
+}
+
+
+
+
+
+
+
+
+
+

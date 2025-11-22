@@ -1,0 +1,38 @@
+{
+  "buttons": {
+    "preview": "미리보기",
+    "addToChat": "채팅에 추가",
+    "zoomOut": "축소",
+    "resetZoom": "확대/축소 초기화",
+    "zoomIn": "확대",
+    "fileInfo": "파일 정보",
+    "copyPath": "경로 복사",
+    "download": "다운로드",
+    "addToFavorites": "즐겨찾기에 추가"
+  },
+  "search": {
+    "placeholder": "파일 검색..."
+  },
+  "filePreview": {
+    "loading": "로딩 중...",
+    "loadFailed": "로드 실패",
+    "imageLoadFailed": "이미지 로드 실패",
+    "videoLoadFailed": "비디오 로드 실패",
+    "fileInfo": "파일 정보",
+    "fileName": "파일 이름",
+    "fileSize": "파일 크기",
+    "fileType": "파일 형식",
+    "createdAt": "생성일",
+    "modifiedAt": "수정일"
+  }
+}
+
+
+
+
+
+
+
+
+
+

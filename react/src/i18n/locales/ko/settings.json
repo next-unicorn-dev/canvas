@@ -1,0 +1,109 @@
+{
+  "title": "설정",
+  "messages": {
+    "settingsSaved": "설정이 저장되었습니다",
+    "settingsReset": "설정이 기본값으로 재설정되었습니다",
+    "failedToSave": "설정 저장 실패",
+    "failedToLoad": "구성 로드 실패",
+    "restartRequired": "프록시 설정을 적용하려면 애플리케이션을 재시작해주세요"
+  },
+  "models": {
+    "title": "모델",
+    "description": "텍스트, 이미지, 비디오 생성용 기본 모델 설정",
+    "placeholder": "모델 이름 입력",
+    "addModel": "모델 추가",
+    "defaultTextModel": "기본 텍스트 생성 모델",
+    "defaultImageModel": "기본 이미지 생성 모델",
+    "defaultVideoModel": "기본 비디오 생성 모델",
+    "selectTextModel": "텍스트 모델 선택",
+    "selectImageModel": "이미지 모델 선택",
+    "selectVideoModel": "비디오 모델 선택",
+    "textModelHelp": "이 모델은 텍스트 생성 작업에 기본적으로 사용됩니다",
+    "imageModelHelp": "이 모델은 이미지 생성 작업에 기본적으로 사용됩니다",
+    "videoModelHelp": "이 모델은 비디오 생성 작업에 기본적으로 사용됩니다",
+    "provider": "제공자",
+    "type": "유형",
+    "noTextModels": "사용 가능한 텍스트 모델이 없습니다. 제공자 탭에서 제공자를 구성해주세요.",
+    "noImageModels": "사용 가능한 이미지 모델이 없습니다. 제공자 탭에서 제공자를 구성해주세요.",
+    "noVideoModels": "사용 가능한 비디오 모델이 없습니다. 제공자 탭에서 제공자를 구성해주세요.",
+    "types": {
+      "text": "텍스트",
+      "image": "이미지",
+      "video": "비디오"
+    }
+  },
+  "provider": {
+    "title": "제공자",
+    "addProvider": "제공자 추가",
+    "providerName": "제공자 이름",
+    "providerNamePlaceholder": "제공자 이름 입력",
+    "apiUrl": "API URL",
+    "apiUrlPlaceholder": "API URL 입력",
+    "apiKey": "API 키",
+    "apiKeyPlaceholder": "API 키 입력",
+    "apiKeyDescription": "API 키는 안전하게 저장됩니다",
+    "maxTokens": "최대 토큰 수",
+    "maxTokensPlaceholder": "최대 토큰 수 입력",
+    "maxTokensDescription": "응답의 최대 토큰 수",
+    "customProvider": "✨ 사용자 지정 제공자",
+    "imageGeneration": "🎨 이미지 생성",
+    "delete": "삭제",
+    "save": "저장",
+    "cancel": "취소",
+    "noModelsSelected": "최소한 하나의 모델을 추가해주세요"
+  },
+  "proxy": {
+    "title": "프록시 설정",
+    "mode": "프록시 모드",
+    "selectMode": "프록시 모드 선택",
+    "modes": {
+      "no_proxy": "프록시 사용 안 함",
+      "system": "시스템 프록시",
+      "custom": "사용자 지정 프록시"
+    },
+    "enable": "프록시 사용",
+    "url": "프록시 URL",
+    "urlPlaceholder": "http://proxy.example.com:8080",
+    "testConnection": "연결 테스트",
+    "testing": "테스트 중...",
+    "testSuccess": "프록시 연결 테스트 성공",
+    "testFailed": "프록시 연결 테스트 실패: {{message}}",
+    "testError": "프록시 연결 테스트 오류",
+    "status": {
+      "enabled": "사용",
+      "disabled": "사용 안 함",
+      "misconfigured": "구성 오류"
+    }
+  },
+  "comfyui": {
+    "title": "ComfyUI",
+    "localImageGeneration": "🎨 로컬 이미지 생성",
+    "enable": "사용",
+    "debugStatus": "🔍 디버그 상태",
+    "status": {
+      "disabled": "사용 안 함",
+      "running": "실행 중",
+      "installed": "설치됨 (실행 중 아님)",
+      "notInstalled": "설치되지 않음",
+      "notRunning": "실행 중 아님",
+      "checking": "확인 중..."
+    },
+    "urlDescription": "ComfyUI 서비스 URL, 이미 설치되어 있다면 주소를 입력하세요",
+    "invalidUrl": "유효한 URL을 입력하세요 (예: http://127.0.0.1:8188)",
+    "notInstalledTitle": "ComfyUI가 설치되지 않음",
+    "notInstalledDescription": "ComfyUI를 설치하여 Flux 모델로 로컬 이미지 생성 활성화",
+    "installButton": "ComfyUI 설치",
+    "startButton": "ComfyUI 시작",
+    "uninstallButton": "ComfyUI 제거",
+    "confirmUninstall": "ComfyUI를 제거하시겠습니까? 시스템에서 ComfyUI가 완전히 제거되며, 다운로드된 모든 모델과 구성이 포함됩니다.",
+    "confirmUninstallButton": "제거 확인",
+    "deleteWorkflowConfirmation": "이 워크플로우를 삭제하시겠습니까?",
+    "addWorkflow": "워크플로우 추가",
+    "addInput": "입력 추가",
+    "workflows": "워크플로우",
+    "editWorkflow": "워크플로우 편집"
+  },
+  "saveSettings": "설정 저장",
+  "close": "닫기",
+  "cancel": "취소"
+}

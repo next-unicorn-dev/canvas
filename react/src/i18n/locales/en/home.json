@@ -1,0 +1,9 @@
+{
+  "title": "Hello We are prism AI",
+  "subtitle": "Ready to turn your ideas into art?",
+  "allProjects": "All Projects",
+  "noCanvases": "No canvases yet",
+  "newCanvas": "Untitled",
+  "addNewProject": "Add New Project",
+  "noTextModel": "Please configure a text model in settings"
+}

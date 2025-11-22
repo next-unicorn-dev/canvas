@@ -1,0 +1,45 @@
+import { Button } from '@/components/ui/button'
+import { Hotkey } from '@/components/ui/hotkey'
+import { useCanvas } from '@/contexts/canvas'
+import { eventBus, TCanvasAddImagesToChatEvent } from '@/lib/event'
+import { useKeyPress } from 'ahooks'
+import { memo } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Instagram } from 'lucide-react'
+
+type CanvasPopbarProps = {
+  selectedImages: TCanvasAddImagesToChatEvent
+  onInstagramClick: () => void
+}
+
+const CanvasPopbar = ({ selectedImages, onInstagramClick }: CanvasPopbarProps) => {
+  const { t } = useTranslation()
+  const { excalidrawAPI } = useCanvas()
+
+  const handleAddToChat = () => {
+    eventBus.emit('Canvas::AddImagesToChat', selectedImages)
+    excalidrawAPI?.updateScene({
+      appState: { selectedElementIds: {} },
+    })
+  }
+
+  const handleUploadToInstagram = () => {
+    onInstagramClick()
+  }
+
+  useKeyPress(['meta.enter', 'ctrl.enter'], handleAddToChat)
+
+  return (
+    <>
+      <Button variant="ghost" size="sm" onClick={handleAddToChat}>
+        {t('canvas:popbar.addToChat')} <Hotkey keys={['⌘', '↩︎']} />
+      </Button>
+      <Button variant="ghost" size="sm" onClick={handleUploadToInstagram}>
+        <Instagram className="w-4 h-4 mr-1" />
+        {t('canvas:popbar.uploadToInstagram')}
+      </Button>
+    </>
+  )
+}
+
+export default memo(CanvasPopbar)
