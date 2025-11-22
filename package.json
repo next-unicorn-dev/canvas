@@ -23,7 +23,7 @@
     "test:watch": "vitest --watch"
   },
   "build": {
-    "appId": "com.jaaz.app",
+    "appId": "com.prismai.app",
     "productName": "Prism AI",
     "directories": {
       "output": "dist"
