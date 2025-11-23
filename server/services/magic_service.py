@@ -79,7 +79,7 @@ async def _process_magic_generation(
     """
     Process magic generation in a separate async task.
     Generates a magical variation of the input image using available image generation tools.
-    This replaces the original Jaaz cloud service with local image generation.
+    This replaces the original Prism AI cloud service with local image generation.
 
     Args:
         messages: List of messages

@@ -14,11 +14,11 @@ export default defineConfig(({ mode }) => {
   const config: UserConfig = {
     plugins: [
       !isLibMode &&
-        TanStackRouterVite({
-          target: 'react',
-          autoCodeSplitting: true,
-          generatedRouteTree: 'src/route-tree.gen.ts',
-        }),
+      TanStackRouterVite({
+        target: 'react',
+        autoCodeSplitting: true,
+        generatedRouteTree: 'src/route-tree.gen.ts',
+      }),
       react(),
       tailwindcss(),
     ].filter(Boolean),
@@ -38,7 +38,7 @@ export default defineConfig(({ mode }) => {
     config.build = {
       lib: {
         entry: path.resolve(__dirname, 'src/index.ts'),
-        name: '@jaaz/agent-ui',
+        name: '@prism-ai/ui',
         fileName: (format: string) => `index.${format}.js`,
         formats: ['es'],
       },

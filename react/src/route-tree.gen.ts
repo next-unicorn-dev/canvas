@@ -15,6 +15,7 @@ import { Route as BrandAnalysisRouteImport } from './routes/brand-analysis'
 import { Route as AssetsRouteImport } from './routes/assets'
 import { Route as Agent_studioRouteImport } from './routes/agent_studio'
 import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AdPerformanceRouteImport } from './routes/ad-performance'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CanvasIdRouteImport } from './routes/canvas.$id'
 import { Route as AdminTemplateAddRouteImport } from './routes/admin.template.add'
@@ -49,6 +50,11 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdPerformanceRoute = AdPerformanceRouteImport.update({
+  id: '/ad-performance',
+  path: '/ad-performance',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
@@ -67,6 +73,7 @@ const AdminTemplateAddRoute = AdminTemplateAddRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/ad-performance': typeof AdPerformanceRoute
   '/admin': typeof AdminRouteWithChildren
   '/agent_studio': typeof Agent_studioRoute
   '/assets': typeof AssetsRoute
@@ -78,6 +85,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/ad-performance': typeof AdPerformanceRoute
   '/admin': typeof AdminRouteWithChildren
   '/agent_studio': typeof Agent_studioRoute
   '/assets': typeof AssetsRoute
@@ -90,6 +98,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/ad-performance': typeof AdPerformanceRoute
   '/admin': typeof AdminRouteWithChildren
   '/agent_studio': typeof Agent_studioRoute
   '/assets': typeof AssetsRoute
@@ -103,6 +112,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/ad-performance'
     | '/admin'
     | '/agent_studio'
     | '/assets'
@@ -114,6 +124,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/ad-performance'
     | '/admin'
     | '/agent_studio'
     | '/assets'
@@ -125,6 +136,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/ad-performance'
     | '/admin'
     | '/agent_studio'
     | '/assets'
@@ -137,6 +149,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdPerformanceRoute: typeof AdPerformanceRoute
   AdminRoute: typeof AdminRouteWithChildren
   Agent_studioRoute: typeof Agent_studioRoute
   AssetsRoute: typeof AssetsRoute
@@ -190,6 +203,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/ad-performance': {
+      id: '/ad-performance'
+      path: '/ad-performance'
+      fullPath: '/ad-performance'
+      preLoaderRoute: typeof AdPerformanceRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -226,6 +246,7 @@ const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdPerformanceRoute: AdPerformanceRoute,
   AdminRoute: AdminRouteWithChildren,
   Agent_studioRoute: Agent_studioRoute,
   AssetsRoute: AssetsRoute,

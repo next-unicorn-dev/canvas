@@ -105,10 +105,6 @@ class ConfigService:
                 content = await f.read()
                 config: AppConfig = toml.loads(content)
 
-            if 'jaaz' in config:
-                print("Removing legacy 'jaaz' provider from configuration")
-                config.pop('jaaz', None)
-
             for provider, provider_config in config.items():
                 if provider not in DEFAULT_PROVIDERS_CONFIG:
                     provider_config['is_custom'] = True
@@ -134,8 +130,6 @@ class ConfigService:
 
     async def update_config(self, data: AppConfig) -> Dict[str, str]:
         try:
-            data.pop('jaaz', None)
-
             os.makedirs(os.path.dirname(self.config_file), exist_ok=True)
             with open(self.config_file, "w") as f:
                 toml.dump(data, f)

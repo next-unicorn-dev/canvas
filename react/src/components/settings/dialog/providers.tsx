@@ -20,8 +20,7 @@ const SettingProviders = () => {
   const [isAddProviderDialogOpen, setIsAddProviderDialogOpen] = useState(false)
 
   const sanitizeProviders = (config: { [key: string]: LLMConfig }) => {
-    const entries = Object.entries(config).filter(([key]) => key !== 'jaaz')
-    return Object.fromEntries(entries)
+    return config
   }
 
   useEffect(() => {

@@ -38,3 +38,5 @@ class V6AddBrandInfo(Migration):
         conn.execute("DROP TABLE IF EXISTS brand_info")
 
 
+
+

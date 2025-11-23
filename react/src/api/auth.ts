@@ -32,8 +32,6 @@ export type RegisterResponse = LoginResponse
 
 const ACCESS_TOKEN_KEY = 'prism_access_token'
 const USER_INFO_KEY = 'prism_user_info'
-const LEGACY_ACCESS_TOKEN_KEY = 'jaaz_access_token'
-const LEGACY_USER_INFO_KEY = 'jaaz_user_info'
 
 function getAuthEndpoint(path: string) {
   return `${BASE_API_URL}/api/auth${path}`
@@ -79,8 +77,6 @@ export async function login(
 }
 
 export async function getAuthStatus(): Promise<AuthStatus> {
-  migrateLegacyAuthKeys()
-
   const token = getAccessToken()
 
   if (!token) {
@@ -226,12 +222,9 @@ export async function getUserProfile(): Promise<UserInfo> {
 export function saveAuthData(token: string, userInfo: UserInfo) {
   localStorage.setItem(ACCESS_TOKEN_KEY, token)
   localStorage.setItem(USER_INFO_KEY, JSON.stringify(userInfo))
-  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY)
-  localStorage.removeItem(LEGACY_USER_INFO_KEY)
 }
 
 export function getAccessToken(): string | null {
-  migrateLegacyAuthKeys()
   return localStorage.getItem(ACCESS_TOKEN_KEY)
 }
 
@@ -263,27 +256,5 @@ async function handleTokenExpiration() {
 function clearStoredAuthData() {
   localStorage.removeItem(ACCESS_TOKEN_KEY)
   localStorage.removeItem(USER_INFO_KEY)
-  localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY)
-  localStorage.removeItem(LEGACY_USER_INFO_KEY)
 }
 
-function migrateLegacyAuthKeys() {
-  const legacyToken = localStorage.getItem(LEGACY_ACCESS_TOKEN_KEY)
-  const legacyUserInfo = localStorage.getItem(LEGACY_USER_INFO_KEY)
-
-  if (legacyToken && !localStorage.getItem(ACCESS_TOKEN_KEY)) {
-    localStorage.setItem(ACCESS_TOKEN_KEY, legacyToken)
-  }
-
-  if (legacyUserInfo && !localStorage.getItem(USER_INFO_KEY)) {
-    localStorage.setItem(USER_INFO_KEY, legacyUserInfo)
-  }
-
-  if (legacyToken) {
-    localStorage.removeItem(LEGACY_ACCESS_TOKEN_KEY)
-  }
-
-  if (legacyUserInfo) {
-    localStorage.removeItem(LEGACY_USER_INFO_KEY)
-  }
-}

@@ -90,7 +90,7 @@ async function getLatestComfyUIRelease() {
       path: '/repos/comfyanonymous/ComfyUI/releases/latest',
       method: 'GET',
       headers: {
-        'User-Agent': 'Jaaz-App/1.0.0',
+        'User-Agent': 'Prism-AI-App/1.0.0',
         Accept: 'application/vnd.github.v3+json',
       },
     }
@@ -398,7 +398,7 @@ async function downloadFile(url, filePath, onProgress, options = {}) {
           request: timeout,
         },
         headers: {
-          'User-Agent': 'Jaaz-App/1.0.0',
+          'User-Agent': 'Prism-AI-App/1.0.0',
         },
       }
 

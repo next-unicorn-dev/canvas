@@ -1,5 +1,5 @@
 {
-  "name": "jaaz",
+  "name": "prism-ai",
   "version": "1.0.30",
   "description": "AI design agent local desktop app",
   "author": "weixuanfu",
@@ -45,7 +45,7 @@
     ],
     "mac": {
       "category": "public.app-category.utilities",
-      "icon": "assets/icons/jaaz.icns",
+      "icon": "assets/icons/prism-ai.icns",
       "target": [
         "dmg",
         "zip"
@@ -55,7 +55,7 @@
       "notarize": false
     },
     "win": {
-      "icon": "assets/icons/jaaz.ico",
+      "icon": "assets/icons/prism-ai.ico",
       "target": [
         "nsis"
       ]

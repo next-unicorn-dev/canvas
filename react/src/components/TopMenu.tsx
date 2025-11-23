@@ -1,7 +1,7 @@
 import { useConfigs } from '@/contexts/configs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ChevronLeft, ImageIcon, Compass, BarChart3, Shield } from 'lucide-react'
+import { ChevronLeft, ImageIcon, Compass, BarChart3, Shield, TrendingUp } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from '@tanstack/react-router'
@@ -72,6 +72,15 @@ export default function TopMenu({
         >
           <Compass className="size-4" />
           {t('canvas:explore', 'Explore')}
+        </Button>
+        <Button
+          variant={window.location.pathname === '/ad-performance' ? 'default' : 'ghost'}
+          size="sm"
+          className={cn('flex items-center font-bold rounded-none')}
+          onClick={() => navigate({ to: '/ad-performance' })}
+        >
+          <TrendingUp className="size-4" />
+          {t('canvas:adPerformance', '광고 성과 분석')}
         </Button>
       </div>
 
