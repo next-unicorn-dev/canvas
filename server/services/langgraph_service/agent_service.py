@@ -21,10 +21,11 @@ class ContextInfo(TypedDict):
 
 
 def _fix_chat_history(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """修复聊天历史中不完整的工具调用
+    """Fix incomplete tool calls in chat history
 
-    根据LangGraph文档建议，移除没有对应ToolMessage的tool_calls
-    参考: https://langchain-ai.github.io/langgraph/troubleshooting/errors/INVALID_CHAT_HISTORY/
+    According to LangGraph documentation recommendations, remove tool_calls
+    that don't have corresponding ToolMessages
+    Reference: https://langchain-ai.github.io/langgraph/troubleshooting/errors/INVALID_CHAT_HISTORY/
     """
     if not messages:
         return messages
@@ -32,17 +33,17 @@ def _fix_chat_history(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
     fixed_messages: List[Dict[str, Any]] = []
     tool_call_ids: Set[str] = set()
 
-    # 第一遍：收集所有ToolMessage的tool_call_id
+    # First pass: collect all tool_call_ids from ToolMessages
     for msg in messages:
         if msg.get('role') == 'tool' and msg.get('tool_call_id'):
             tool_call_id = msg.get('tool_call_id')
             if tool_call_id:
                 tool_call_ids.add(tool_call_id)
 
-    # 第二遍：修复AIMessage中的tool_calls
+    # Second pass: fix tool_calls in AIMessages
     for msg in messages:
         if msg.get('role') == 'assistant' and msg.get('tool_calls'):
-            # 过滤掉没有对应ToolMessage的tool_calls
+            # Filter out tool_calls that don't have corresponding ToolMessages
             valid_tool_calls: List[Dict[str, Any]] = []
             removed_calls: List[str] = []
 
@@ -53,23 +54,23 @@ def _fix_chat_history(messages: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
                 elif tool_call_id:
                     removed_calls.append(tool_call_id)
 
-            # 记录修复信息
+            # Log fix information
             if removed_calls:
                 print(
-                    f"🔧 修复消息历史：移除了 {len(removed_calls)} 个不完整的工具调用: {removed_calls}")
+                    f"🔧 Fixed message history: removed {len(removed_calls)} incomplete tool calls: {removed_calls}")
 
-            # 更新消息
+            # Update message
             if valid_tool_calls:
                 msg_copy = msg.copy()
                 msg_copy['tool_calls'] = valid_tool_calls
                 fixed_messages.append(msg_copy)
-            elif msg.get('content'):  # 如果没有有效的tool_calls但有content，保留消息
+            elif msg.get('content'):  # If no valid tool_calls but has content, keep the message
                 msg_copy = msg.copy()
-                msg_copy.pop('tool_calls', None)  # 移除空的tool_calls
+                msg_copy.pop('tool_calls', None)  # Remove empty tool_calls
                 fixed_messages.append(msg_copy)
-            # 如果既没有有效tool_calls也没有content，跳过这条消息
+            # If neither valid tool_calls nor content, skip this message
         else:
-            # 非assistant消息或没有tool_calls的消息直接保留
+            # Non-assistant messages or messages without tool_calls are kept directly
             fixed_messages.append(msg)
 
     return fixed_messages
@@ -83,15 +84,15 @@ async def langgraph_multi_agent(
     tool_list: List[ToolInfoJson],
     system_prompt: Optional[str] = None
 ) -> None:
-    """多智能体处理函数
+    """Multi-agent processing function
 
     Args:
-        messages: 消息历史
-        canvas_id: 画布ID
-        session_id: 会话ID
-        text_model: 文本模型配置
-        tool_list: 工具模型配置列表（图像或视频模型）
-        system_prompt: 系统提示词
+        messages: Message history
+        canvas_id: Canvas ID
+        session_id: Session ID
+        text_model: Text model configuration
+        tool_list: Tool model configuration list (image or video models)
+        system_prompt: System prompt
     """
     try:
         # Skip processing if messages are empty (for empty canvas)
@@ -99,16 +100,16 @@ async def langgraph_multi_agent(
             print(f"⚠️ Skipping langgraph_multi_agent for empty messages (session_id: {session_id})")
             return
         
-        # 0. 修复消息历史
+        # 0. Fix message history
         fixed_messages = _fix_chat_history(messages)
 
-        # 2. 文本模型
+        # 2. Text model
         text_model_instance = _create_text_model(text_model)
 
-        # 3. 创建智能体
+        # 3. Create agents
         agents = AgentManager.create_agents(
             text_model_instance,
-            tool_list,  # 传入所有注册的工具
+            tool_list,  # Pass all registered tools
             system_prompt or ""
         )
         agent_names = [agent.name for agent in agents]
@@ -118,20 +119,20 @@ async def langgraph_multi_agent(
 
         print('👇last_agent', last_agent)
 
-        # 4. 创建智能体群组
+        # 4. Create agent swarm
         swarm = create_swarm(
             agents=agents,  # type: ignore
             default_active_agent=last_agent if last_agent else agent_names[0]
         )
 
-        # 5. 创建上下文
+        # 5. Create context
         context = {
             'canvas_id': canvas_id,
             'session_id': session_id,
             'tool_list': tool_list,
         }
 
-        # 6. 流处理
+        # 6. Stream processing
         processor = StreamProcessor(
             session_id, db_service, send_to_websocket)  # type: ignore
         await processor.process_stream(swarm, fixed_messages, context)
@@ -141,7 +142,7 @@ async def langgraph_multi_agent(
 
 
 def _create_text_model(text_model: ModelInfo) -> Any:
-    """创建语言模型实例"""
+    """Create language model instance"""
     model = text_model.get('model')
     provider = text_model.get('provider')
     url = text_model.get('url')
@@ -166,14 +167,14 @@ def _create_text_model(text_model: ModelInfo) -> Any:
             timeout=300,
             base_url=url,
             temperature=0,
-            # max_tokens=max_tokens, # TODO: 暂时注释掉有问题的参数
+            # max_tokens=max_tokens, # TODO: Temporarily commented out problematic parameter
             http_client=http_client,
             http_async_client=http_async_client
         )
 
 
 async def _handle_error(error: Exception, session_id: str) -> None:
-    """处理错误"""
+    """Handle errors"""
     print('Error in langgraph_agent', error)
     tb_str = traceback.format_exc()
     print(f"Full traceback:\n{tb_str}")

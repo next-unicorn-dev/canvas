@@ -9,9 +9,10 @@ from services.tool_service import tool_service
 
 
 class AgentManager:
-    """智能体管理器 - 负责创建和管理所有智能体
+    """Agent Manager - Responsible for creating and managing all agents
 
-    此类负责协调智能体配置的获取和实际 LangGraph 智能体的创建。
+    This class is responsible for coordinating the retrieval of agent configurations
+    and the creation of actual LangGraph agents.
     """
 
     @staticmethod
@@ -20,22 +21,22 @@ class AgentManager:
         tool_list: List[ToolInfoJson],
         system_prompt: str = ""
     ) -> List[CompiledGraph]:
-        """创建所有智能体
+        """Create all agents
 
         Args:
-            model: 语言模型实例
-            registered_tools: 已注册的工具名称列表
-            system_prompt: 系统提示词
+            model: Language model instance
+            registered_tools: List of registered tool names
+            system_prompt: System prompt
 
         Returns:
-            List[Any]: 创建好的智能体列表
+            List[Any]: List of created agents
         """
-        # 为不同类型的智能体过滤合适的工具
+        # Filter appropriate tools for different types of agents
         image_tools =  [tool for tool in tool_list if tool.get('type') == 'image']
         video_tools = [tool for tool in tool_list if tool.get('type') == 'video']
 
-        print(f"📸 图像工具: {image_tools}")
-        print(f"🎬 视频工具: {video_tools}")
+        print(f"📸 Image tools: {image_tools}")
+        print(f"🎬 Video tools: {video_tools}")
 
         planner_config = PlannerAgentConfig()
         # Add custom system prompt to planner if provided
@@ -72,16 +73,16 @@ class AgentManager:
         model: Any,
         config: BaseAgentConfig
     ) -> CompiledGraph:
-        """根据配置创建单个 LangGraph 智能体
+        """Create a single LangGraph agent based on configuration
 
         Args:
-            model: 语言模型实例
-            config: 智能体配置字典
+            model: Language model instance
+            config: Agent configuration dictionary
 
         Returns:
-            Any: 创建好的 LangGraph 智能体实例
+            Any: Created LangGraph agent instance
         """
-        # 创建智能体间切换工具
+        # Create handoff tools for agent switching
         handoff_tools: List[BaseTool] = []
         for handoff in config.handoffs:
             handoff_tool = create_handoff_tool(
@@ -91,14 +92,14 @@ class AgentManager:
             if handoff_tool:
                 handoff_tools.append(handoff_tool)
 
-        # 获取业务工具
+        # Get business tools
         business_tools: List[BaseTool] = []
         for tool_json in config.tools:
             tool = tool_service.get_tool(tool_json['id'])
             if tool:
                 business_tools.append(tool)
 
-        # 创建并返回 LangGraph 智能体
+        # Create and return LangGraph agent
         return create_react_agent(
             name=config.name,
             model=model,
@@ -111,14 +112,14 @@ class AgentManager:
         messages: List[Dict[str, Any]],
         agent_names: List[str]
     ) -> Optional[str]:
-        """获取最后活跃的智能体
+        """Get the last active agent
 
         Args:
-            messages: 消息历史
-            agent_names: 智能体名称列表
+            messages: Message history
+            agent_names: List of agent names
 
         Returns:
-            Optional[str]: 最后活跃的智能体名称，如果没有则返回 None
+            Optional[str]: Name of the last active agent, or None if not found
         """
         for message in reversed(messages):
             if message.get('role') == 'assistant':
