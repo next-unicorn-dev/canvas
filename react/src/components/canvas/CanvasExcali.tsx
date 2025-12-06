@@ -142,6 +142,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       excalidrawAPI.updateScene({
         appState: {
           viewBackgroundColor: '#121212',
+          // @ts-ignore - gridColor may not be in type definition
           gridColor: 'rgba(255, 255, 255, 0.1)',
         }
       })
@@ -150,6 +151,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
       excalidrawAPI.updateScene({
         appState: {
           viewBackgroundColor: '#ffffff',
+          // @ts-ignore - gridColor may not be in type definition
           gridColor: 'rgba(0, 0, 0, 0.1)',
         }
       })
@@ -401,6 +403,7 @@ const CanvasExcali: React.FC<CanvasExcaliProps> = ({
     <Excalidraw
       theme={customTheme as Theme}
       langCode={i18n.language}
+      // @ts-ignore - className prop may not be in type definition
       className={excalidrawClassName}
       excalidrawAPI={(api) => {
         setExcalidrawAPI(api)

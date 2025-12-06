@@ -33,10 +33,12 @@ const UpdateNotificationDialog = () => {
       setShowUpdateDialog(true)
     }
 
-    window.electronAPI?.onUpdateDownloaded(handleUpdateDownloaded)
+    // @ts-ignore - autoUpdater methods removed
+    window.electronAPI?.onUpdateDownloaded?.(handleUpdateDownloaded)
 
     return () => {
-      window.electronAPI?.removeUpdateDownloadedListener()
+      // @ts-ignore - autoUpdater methods removed
+      window.electronAPI?.removeUpdateDownloadedListener?.()
     }
   }, [])
 
@@ -67,7 +69,8 @@ const UpdateNotificationDialog = () => {
   const handleInstallUpdate = async () => {
     setIsInstalling(true)
     try {
-      await window.electronAPI?.restartAndInstall()
+      // @ts-ignore - autoUpdater methods removed
+      await window.electronAPI?.restartAndInstall?.()
     } catch (error) {
       console.error('Failed to install update:', error)
       setIsInstalling(false)

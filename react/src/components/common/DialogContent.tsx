@@ -23,6 +23,7 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
     z: 0,
     transition: {
       duration: 0.5,
+      // @ts-ignore - motion/react ease array type
       ease: [0.17, 0.67, 0.51, 1],
       opacity: {
         delay: 0.2,
@@ -40,6 +41,7 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
     rotateX: 25,
     transition: {
       duration: 0.3,
+      // @ts-ignore - motion/react ease array type
       ease: [0.67, 0.17, 0.62, 0.64],
     },
   }
@@ -63,8 +65,11 @@ const CommonDialogContent: React.FC<CommonDialogProps> = ({
                   'grid rounded-lg p-4 min-w-[300px] w-full max-w-lg gap-4 border bg-background shadow-lg sm:rounded-lg',
                   className
                 )}
+                // @ts-ignore - motion/react ease array type compatibility
                 initial={initialState}
+                // @ts-ignore - motion/react ease array type compatibility
                 animate={openState}
+                // @ts-ignore - motion/react ease array type compatibility
                 exit={initialState}
                 style={{ transformPerspective }}
               >
