@@ -35,8 +35,6 @@ console.log('🟢 Prism AI Electron app starting...')
 const { app, BrowserWindow, ipcMain, dialog, session } = require('electron')
 const { spawn } = require('child_process')
 
-const { autoUpdater } = require('electron-updater')
-
 const net = require('net')
 
 // Initialize settings service
@@ -82,44 +80,6 @@ let mainWindow
 let pyProc = null
 let pyPort = null
 let childWindows = [] // Track all child windows
-
-// check for updates after the app is ready
-// Auto-updater event handlers
-autoUpdater.on('checking-for-update', () => {
-  console.log('Checking for update...')
-})
-
-autoUpdater.on('update-available', (info) => {
-  console.log('Update available.')
-  console.log('Version:', info.version)
-  console.log('Release date:', info.releaseDate)
-  // Automatically download the update when available
-  autoUpdater.downloadUpdate()
-})
-
-autoUpdater.on('update-not-available', (info) => {
-  console.log('Update not available:', info)
-})
-
-autoUpdater.on('error', (err) => {
-  console.log('Error in auto-updater. ' + err)
-})
-
-autoUpdater.on('download-progress', (progressObj) => {
-  let log_message = 'Download speed: ' + progressObj.bytesPerSecond
-  log_message = log_message + ' - Downloaded ' + progressObj.percent + '%'
-  log_message = log_message + ' (' + progressObj.transferred + '/' + progressObj.total + ')'
-  console.log(log_message)
-})
-
-autoUpdater.on('update-downloaded', (info) => {
-  console.log('new Prism AI version downloaded:', info.version)
-
-  // send message to renderer process
-  if (mainWindow) {
-    mainWindow.webContents.send('update-downloaded', info)
-  }
-})
 
 const createWindow = (pyPort) => {
   mainWindow = new BrowserWindow({
@@ -327,21 +287,6 @@ ipcMain.handle('pick-video', async () => {
   return null
 })
 
-// Add IPC handlers for manual update check
-ipcMain.handle('check-for-updates', () => {
-  if (app.isPackaged) {
-    autoUpdater.checkForUpdatesAndNotify()
-    return { message: 'Checking for updates...' }
-  } else {
-    return { message: 'Auto-updater is disabled in development mode' }
-  }
-})
-
-// restart and install the new version
-ipcMain.handle('restart-and-install', () => {
-  autoUpdater.quitAndInstall()
-})
-
 const ipcHandlers = require('./ipcHandlers')
 
 for (const [channel, handler] of Object.entries(ipcHandlers)) {
@@ -371,14 +316,6 @@ if (!gotTheLock) {
       console.log('Proxy settings applied for Electron sessions')
     } catch (error) {
       console.error('Failed to apply proxy settings for Electron sessions:', error)
-    }
-
-    // Check for updates in production every time app starts
-    if (process.env.NODE_ENV !== 'development' && app.isPackaged) {
-      // Wait a bit for the app to fully load before checking updates
-      setTimeout(() => {
-        autoUpdater.checkForUpdatesAndNotify()
-      }, 3000)
     }
 
     // Start Python API in both development and production

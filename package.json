@@ -11,10 +11,6 @@
     "dev": "concurrently \"npm run dev:react\" \"npm run dev:electron\"",
     "start:frontend": "cd frontend && npm run dev",
     "start:electron": "npx electron electron/main.js",
-    "build:electron": "electron-builder",
-    "build:win": "electron-builder --win",
-    "build:mac": "electron-builder --mac",
-    "build:linux": "electron-builder --linux",
     "build:ts": "cd electron && tsc",
     "watch:ts": "cd electron && tsc --watch",
     "clean:ts": "cd electron && rm -rf dist",
@@ -22,63 +18,12 @@
     "test:run": "vitest run",
     "test:watch": "vitest --watch"
   },
-  "build": {
-    "appId": "com.prismai.app",
-    "productName": "Prism AI",
-    "directories": {
-      "output": "dist"
-    },
-    "files": [
-      "electron/**/*",
-      "package.json",
-      "assets/icons/*"
-    ],
-    "extraResources": [
-      {
-        "from": "server/dist/",
-        "to": "server/dist/"
-      },
-      {
-        "from": "react/dist/",
-        "to": "react/dist/"
-      }
-    ],
-    "mac": {
-      "category": "public.app-category.utilities",
-      "icon": "assets/icons/prism-ai.icns",
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "gatekeeperAssess": false,
-      "hardenedRuntime": false,
-      "notarize": false
-    },
-    "win": {
-      "icon": "assets/icons/prism-ai.ico",
-      "target": [
-        "nsis"
-      ]
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ]
-    }
-  },
   "devDependencies": {
-    "@electron/notarize": "^3.0.1",
     "@types/electron": "^1.4.38",
     "@types/node": "^20.19.4",
     "concurrently": "^9.1.2",
     "cross-env": "^7.0.3",
     "electron": "^35.1.0",
-    "electron-builder": "^24.0.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3",
     "vitest": "^3.2.1"
@@ -86,7 +31,6 @@
   "dependencies": {
     "@google/gemini-cli-core": "^0.1.9",
     "7zip-min": "^2.1.0",
-    "electron-updater": "^6.6.2",
     "got": "11.8.6",
     "os-proxy-config": "^1.1.2",
     "playwright": "^1.52.0",

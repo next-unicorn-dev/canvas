@@ -29,30 +29,6 @@ export const PROVIDER_NAME_MAPPING: {
     icon: 'https://registry.npmmirror.com/@lobehub/icons-static-png/latest/files/dark/claude-color.png',
   },
   openai: { name: 'OpenAI', icon: 'https://openai.com/favicon.ico' },
-  replicate: {
-    name: 'Replicate',
-    icon: 'https://images.seeklogo.com/logo-png/61/1/replicate-icon-logo-png_seeklogo-611690.png',
-  },
-  ollama: {
-    name: 'Ollama',
-    icon: 'https://images.seeklogo.com/logo-png/59/1/ollama-logo-png_seeklogo-593420.png',
-  },
-  huggingface: {
-    name: 'Hugging Face',
-    icon: 'https://huggingface.co/favicon.ico',
-  },
-  wavespeed: {
-    name: 'WaveSpeedAi',
-    icon: 'https://www.wavespeed.ai/favicon.ico',
-  },
-  volces: {
-    name: 'Volces',
-    icon: 'https://portal.volccdn.com/obj/volcfe/misc/favicon.png',
-  },
-  comfyui: {
-    name: 'ComfyUI',
-    icon: 'https://framerusercontent.com/images/3cNQMWKzIhIrQ5KErBm7dSmbd2w.png',
-  },
 }
 
 // Tool call name mapping
