@@ -142,5 +142,7 @@
   "brandChatExtracted": "I've extracted the brand information. Please check the form on the right. If you have additional information, please continue!",
   "brandChatContinue": "Got it. If you provide more detailed information, I can organize it more accurately.",
   "brandChatError": "Sorry, an error occurred while extracting information. Please try again.",
-  "brandChatPlaceholder": "Tell us about your brand..."
+  "brandChatPlaceholder": "Tell us about your brand...",
+  "adPerformance": "Ad Performance",
+  "adPerformanceDescription": "View and analyze the performance of your ad campaigns"
 }

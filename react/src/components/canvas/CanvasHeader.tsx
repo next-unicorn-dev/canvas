@@ -1,6 +1,7 @@
 import { Input } from '@/components/ui/input'
 import CanvasExport from './CanvasExport'
 import TopMenu from '../TopMenu'
+import { useTranslation } from 'react-i18next'
 
 type CanvasHeaderProps = {
   canvasName: string
@@ -15,6 +16,8 @@ const CanvasHeader: React.FC<CanvasHeaderProps> = ({
   onNameChange,
   onNameSave,
 }) => {
+  const { t } = useTranslation()
+
   return (
     <TopMenu
       middle={
@@ -23,6 +26,7 @@ const CanvasHeader: React.FC<CanvasHeaderProps> = ({
           value={canvasName}
           onChange={(e) => onNameChange(e.target.value)}
           onBlur={onNameSave}
+          placeholder={t('canvas:untitled', 'Untitled')}
         />
       }
       right={<CanvasExport />}
