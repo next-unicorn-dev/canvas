@@ -10,10 +10,10 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { cn } from '@/lib/utils'
-import { PlugZap, Network, ChevronLeft, Settings2 } from 'lucide-react'
+import { PlugZap, Network, ChevronLeft, Settings2, Instagram } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-export type SettingSidebarType = 'provider' | 'proxy' | 'models'
+export type SettingSidebarType = 'provider' | 'proxy' | 'models' | 'instagram'
 
 type SettingSidebar = {
   current: SettingSidebarType
@@ -43,6 +43,11 @@ const SettingSidebar: React.FC<SettingSidebar> = ({
       type: 'models',
       title: 'settings:models.title',
       icon: Settings2,
+    },
+    {
+      type: 'instagram',
+      title: 'settings:instagram.title',
+      icon: Instagram,
     },
     {
       type: 'proxy',

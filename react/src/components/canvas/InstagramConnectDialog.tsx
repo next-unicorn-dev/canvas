@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react'
-import { Dialog } from '@/components/ui/dialog'
+import { useState, useEffect, useRef } from 'react'
+import { Dialog, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import CommonDialogContent from '@/components/common/DialogContent'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
@@ -13,6 +13,7 @@ import {
   type InstagramStatusResponse,
 } from '@/api/instagram'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 
 interface InstagramConnectDialogProps {
   open: boolean
@@ -27,21 +28,43 @@ export default function InstagramConnectDialog({
   const [status, setStatus] = useState<InstagramStatusResponse | null>(null)
   const [loading, setLoading] = useState(false)
   const [connecting, setConnecting] = useState(false)
+  const processedRef = useRef(false)
+  const { authStatus, isLoading: isAuthLoading } = useAuth()
 
   // OAuth 콜백 처리
   useEffect(() => {
     const handleOAuthCallback = async () => {
+      // 인증 로딩 중이거나 로그아웃 상태면 처리 보류
+      if (isAuthLoading) {
+        console.log('Instagram Auth: Waiting for auth loading...')
+        return
+      }
+
+      if (!authStatus.is_logged_in) {
+        console.log('Instagram Auth: User not logged in, skipping connect')
+        return
+      }
+
       const urlParams = new URLSearchParams(window.location.search)
       const authResult = urlParams.get('instagram_auth')
       
+      console.log('Instagram Auth Check:', authResult, window.location.search)
+
       if (authResult === 'success') {
+        if (processedRef.current) {
+            console.log('Already processed auth callback')
+            return
+        }
+        
         const token = urlParams.get('token')
         const userId = urlParams.get('user_id')
         const username = urlParams.get('username')
         
         if (token && userId && username) {
+          processedRef.current = true
           setConnecting(true)
           try {
+            console.log('Connecting to Instagram...', { username })
             await connectInstagram({
               access_token: token,
               instagram_user_id: userId,
@@ -49,11 +72,26 @@ export default function InstagramConnectDialog({
               expires_in: 5184000, // 60 days
             })
             toast.success('Instagram account connected successfully!')
-            // URL에서 파라미터 제거
-            window.history.replaceState({}, '', window.location.pathname)
             await loadStatus()
+            
+            // 성공 처리가 완료된 후 URL 정리 및 원래 페이지로 복귀
+            const returnUrl = localStorage.getItem('instagram_return_url')
+            if (returnUrl) {
+              localStorage.removeItem('instagram_return_url')
+              // 현재 경로(쿼리 파라미터 제외)가 returnUrl과 다르면 이동
+              // 단, returnUrl에 이미 instagram_auth 파라미터가 없어야 함
+              const returnUrlObj = new URL(returnUrl)
+              if (returnUrlObj.pathname !== window.location.pathname) {
+                 window.location.href = returnUrlObj.href
+                 return 
+              }
+            }
+            
+            window.history.replaceState({}, '', window.location.pathname)
           } catch (error) {
+            console.error('Failed to connect:', error)
             toast.error(`Failed to connect: ${error}`)
+            processedRef.current = false // 실패 시 재시도 가능하도록 리셋
           } finally {
             setConnecting(false)
           }
@@ -67,9 +105,11 @@ export default function InstagramConnectDialog({
 
     if (open) {
       handleOAuthCallback()
-      loadStatus()
+      if (!isAuthLoading && authStatus.is_logged_in) {
+        loadStatus()
+      }
     }
-  }, [open])
+  }, [open, isAuthLoading, authStatus])
 
   const loadStatus = async () => {
     try {
@@ -92,6 +132,9 @@ export default function InstagramConnectDialog({
   const handleConnect = async () => {
     try {
       setConnecting(true)
+      // 현재 URL 저장 (인증 후 복귀를 위해)
+      localStorage.setItem('instagram_return_url', window.location.href)
+      
       const { auth_url } = await getInstagramAuthUrl()
       // 새 창에서 Instagram 인증 페이지 열기
       window.location.href = auth_url
@@ -120,6 +163,10 @@ export default function InstagramConnectDialog({
         open={open}
         className="flex flex-col p-6 gap-4 w-full max-w-md rounded-lg border bg-background shadow-lg"
       >
+        <DialogTitle className="sr-only">{t('canvas:instagram.connectTitle', 'Connect Instagram')}</DialogTitle>
+        <DialogDescription className="sr-only">
+          {t('canvas:instagram.connectDescription', 'Connect your Instagram account to upload images directly from the canvas.')}
+        </DialogDescription>
         <div className="flex items-center gap-3">
           <Instagram className="w-6 h-6" />
           <h2 className="text-xl font-semibold">

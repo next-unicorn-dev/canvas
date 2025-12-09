@@ -103,6 +103,18 @@
     "workflows": "워크플로우",
     "editWorkflow": "워크플로우 편집"
   },
+  "instagram": {
+    "title": "Instagram 연동",
+    "description": "Instagram 계정을 연결하여 캔버스에서 작품을 바로 공유하세요.",
+    "cardDescription": "Instagram 연결 상태를 관리합니다.",
+    "connectedAs": "연결된 계정:",
+    "tokenExpired": "세션이 만료되었습니다. 다시 연결해주세요.",
+    "notConnected": "연결된 계정이 없습니다.",
+    "connect": "Instagram 연결",
+    "connecting": "연결 중...",
+    "disconnect": "계정 연결 해제",
+    "disconnecting": "연결 해제 중..."
+  },
   "saveSettings": "설정 저장",
   "close": "닫기",
   "cancel": "취소"

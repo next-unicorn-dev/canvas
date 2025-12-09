@@ -9,6 +9,7 @@ import { useTranslation } from 'react-i18next'
 import SettingProviders from './providers'
 import SettingProxy from './proxy'
 import SettingModels from './models'
+import SettingInstagram from './instagram'
 import SettingSidebar, { SettingSidebarType } from './sidebar'
 import { X } from 'lucide-react'
 
@@ -23,6 +24,8 @@ const SettingsDialog = () => {
         return <SettingProxy />
       case 'models':
         return <SettingModels />
+      case 'instagram':
+        return <SettingInstagram />
       case 'provider':
       default:
         return <SettingProviders />

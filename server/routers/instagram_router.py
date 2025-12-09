@@ -3,6 +3,7 @@ Instagram Router - Instagram OAuth 및 업로드 API 엔드포인트
 """
 
 import secrets
+import os
 from fastapi import APIRouter, HTTPException, status, Header, Query
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
@@ -78,13 +79,18 @@ async def oauth_callback(
         # 실제로는 state를 암호화하거나 세션에 저장해야 함
         # 여기서는 프론트엔드에서 user_id를 전달받아야 함
         
+        # 프론트엔드 URL 결정 (환경변수 또는 기본값)
+        # 개발 환경에서는 React 서버 포트(5174) 사용, 배포 시에는 빈 문자열(상대 경로) 또는 실제 도메인
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5174")
+        
         return RedirectResponse(
-            url=f"/?instagram_auth=success&token={long_lived_token}&user_id={instagram_user_id}&username={instagram_username}",
+            url=f"{frontend_url}/?instagram_auth=success&token={long_lived_token}&user_id={instagram_user_id}&username={instagram_username}",
             status_code=302
         )
     except Exception as e:
+        frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5174")
         return RedirectResponse(
-            url=f"/?instagram_auth=error&error={str(e)}",
+            url=f"{frontend_url}/?instagram_auth=error&error={str(e)}",
             status_code=302
         )
 

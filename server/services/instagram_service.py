@@ -15,21 +15,23 @@ from services.db_service import DB_PATH
 class InstagramService:
     """Instagram API 연동 서비스"""
     
-    # Instagram Graph API 엔드포인트
-    BASE_URL = "https://graph.instagram.com"
-    OAUTH_URL = "https://api.instagram.com/oauth"
+    # Instagram Graph API 엔드포인트 (Facebook Graph API 사용)
+    GRAPH_VERSION = "v18.0"
+    BASE_URL = f"https://graph.facebook.com/{GRAPH_VERSION}"
+    OAUTH_URL = f"https://www.facebook.com/{GRAPH_VERSION}/dialog/oauth"
     
     def __init__(self):
         # 환경변수에서 Instagram App 설정 가져오기
         self.app_id = os.getenv("INSTAGRAM_APP_ID", "")
         self.app_secret = os.getenv("INSTAGRAM_APP_SECRET", "")
-        self.redirect_uri = os.getenv("INSTAGRAM_REDIRECT_URI", "http://localhost:8000/api/instagram/callback")
+        self.redirect_uri = os.getenv("INSTAGRAM_REDIRECT_URI", "http://localhost:57988/api/instagram/callback")
         
     def get_authorization_url(self, state: str) -> str:
-        """Instagram OAuth 인증 URL 생성"""
-        scopes = "user_profile,user_media"
+        """Instagram(Facebook) OAuth 인증 URL 생성"""
+        # Graph API 사용을 위한 스코프
+        scopes = "instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement"
         return (
-            f"{self.OAUTH_URL}/authorize"
+            f"{self.OAUTH_URL}"
             f"?client_id={self.app_id}"
             f"&redirect_uri={self.redirect_uri}"
             f"&scope={scopes}"
@@ -40,12 +42,11 @@ class InstagramService:
     async def exchange_code_for_token(self, code: str) -> Dict[str, Any]:
         """인증 코드를 액세스 토큰으로 교환"""
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{self.OAUTH_URL}/access_token",
-                data={
+            response = await client.get(
+                f"{self.BASE_URL}/oauth/access_token",
+                params={
                     "client_id": self.app_id,
                     "client_secret": self.app_secret,
-                    "grant_type": "authorization_code",
                     "redirect_uri": self.redirect_uri,
                     "code": code,
                 },
@@ -57,11 +58,12 @@ class InstagramService:
         """단기 토큰을 장기 토큰으로 교환 (60일 유효)"""
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{self.BASE_URL}/access_token",
+                f"{self.BASE_URL}/oauth/access_token",
                 params={
-                    "grant_type": "ig_exchange_token",
+                    "grant_type": "fb_exchange_token",
+                    "client_id": self.app_id,
                     "client_secret": self.app_secret,
-                    "access_token": short_lived_token,
+                    "fb_exchange_token": short_lived_token,
                 },
             )
             response.raise_for_status()
@@ -69,29 +71,55 @@ class InstagramService:
     
     async def refresh_long_lived_token(self, access_token: str) -> Dict[str, Any]:
         """장기 토큰 갱신 (60일 연장)"""
-        async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.BASE_URL}/refresh_access_token",
-                params={
-                    "grant_type": "ig_refresh_token",
-                    "access_token": access_token,
-                },
-            )
-            response.raise_for_status()
-            return response.json()
+        # Graph API에서는 동일한 호출로 갱신 가능
+        return await self.get_long_lived_token(access_token)
     
     async def get_user_info(self, access_token: str) -> Dict[str, Any]:
-        """Instagram 사용자 정보 가져오기"""
+        """Instagram 사용자 정보 가져오기 (Facebook 계정 -> Instagram 계정 조회)"""
         async with httpx.AsyncClient() as client:
-            response = await client.get(
-                f"{self.BASE_URL}/me",
+            # 1. 연결된 페이지 목록 조회
+            pages_response = await client.get(
+                f"{self.BASE_URL}/me/accounts",
                 params={
-                    "fields": "id,username,account_type",
                     "access_token": access_token,
                 },
             )
-            response.raise_for_status()
-            return response.json()
+            pages_response.raise_for_status()
+            pages_data = pages_response.json()
+            
+            # 2. 첫 번째 페이지에 연결된 인스타그램 비즈니스 계정 ID 조회
+            instagram_business_account = None
+            if "data" in pages_data and len(pages_data["data"]) > 0:
+                page_id = pages_data["data"][0]["id"]
+                page_token = pages_data["data"][0].get("access_token", access_token) # 페이지 토큰 사용 권장
+                
+                # 페이지 정보를 통해 인스타그램 계정 ID 조회
+                ig_response = await client.get(
+                    f"{self.BASE_URL}/{page_id}",
+                    params={
+                        "fields": "instagram_business_account",
+                        "access_token": page_token,
+                    },
+                )
+                ig_response.raise_for_status()
+                ig_data = ig_response.json()
+                instagram_business_account = ig_data.get("instagram_business_account")
+
+            if not instagram_business_account:
+                raise ValueError("No Instagram Business Account connected to this Facebook Page")
+
+            ig_user_id = instagram_business_account["id"]
+            
+            # 3. 인스타그램 사용자 정보 조회
+            user_response = await client.get(
+                f"{self.BASE_URL}/{ig_user_id}",
+                params={
+                    "fields": "id,username,name,profile_picture_url",
+                    "access_token": access_token,
+                },
+            )
+            user_response.raise_for_status()
+            return user_response.json()
     
     async def save_token(
         self,
@@ -204,11 +232,12 @@ class InstagramService:
         access_token: str,
         image_url: str,
         caption: str,
+        ig_user_id: str,
     ) -> Dict[str, Any]:
         """미디어 컨테이너 생성 (이미지 업로드 준비)"""
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.BASE_URL}/me/media",
+                f"{self.BASE_URL}/{ig_user_id}/media",
                 params={
                     "image_url": image_url,
                     "caption": caption,
@@ -218,11 +247,11 @@ class InstagramService:
             response.raise_for_status()
             return response.json()
     
-    async def publish_media(self, access_token: str, creation_id: str) -> Dict[str, Any]:
+    async def publish_media(self, access_token: str, creation_id: str, ig_user_id: str) -> Dict[str, Any]:
         """미디어 컨테이너를 실제 포스트로 발행"""
         async with httpx.AsyncClient() as client:
             response = await client.post(
-                f"{self.BASE_URL}/me/media_publish",
+                f"{self.BASE_URL}/{ig_user_id}/media_publish",
                 params={
                     "creation_id": creation_id,
                     "access_token": access_token,
@@ -238,16 +267,25 @@ class InstagramService:
         caption: str,
     ) -> Dict[str, Any]:
         """이미지를 Instagram에 업로드"""
+        token_data = await self.get_token(user_id)
+        if not token_data:
+             raise ValueError("No Instagram token found. Please reconnect your account.")
+             
+        # 토큰 갱신 로직 (get_valid_token 내장)
         access_token = await self.get_valid_token(user_id)
         if not access_token:
-            raise ValueError("No valid Instagram token found. Please reconnect your account.")
+            raise ValueError("Failed to get valid Instagram token.")
+
+        ig_user_id = token_data.get("instagram_user_id")
+        if not ig_user_id:
+             raise ValueError("Instagram User ID not found in token data.")
         
         # 1. 미디어 컨테이너 생성
-        container = await self.create_media_container(access_token, image_url, caption)
+        container = await self.create_media_container(access_token, image_url, caption, ig_user_id)
         creation_id = container["id"]
         
         # 2. 미디어 발행
-        result = await self.publish_media(access_token, creation_id)
+        result = await self.publish_media(access_token, creation_id, ig_user_id)
         return result
     
     async def get_user_media(
@@ -257,9 +295,15 @@ class InstagramService:
         after: Optional[str] = None,
     ) -> Dict[str, Any]:
         """사용자의 Instagram 미디어 가져오기"""
+        token_data = await self.get_token(user_id)
+        if not token_data:
+             raise ValueError("No Instagram token found. Please reconnect your account.")
+
         access_token = await self.get_valid_token(user_id)
         if not access_token:
-            raise ValueError("No valid Instagram token found. Please reconnect your account.")
+            raise ValueError("Failed to get valid Instagram token.")
+            
+        ig_user_id = token_data.get("instagram_user_id")
         
         params = {
             "fields": "id,media_type,media_url,thumbnail_url,permalink,caption,timestamp,like_count,comments_count",
@@ -272,7 +316,7 @@ class InstagramService:
         
         async with httpx.AsyncClient() as client:
             response = await client.get(
-                f"{self.BASE_URL}/me/media",
+                f"{self.BASE_URL}/{ig_user_id}/media",
                 params=params,
             )
             response.raise_for_status()

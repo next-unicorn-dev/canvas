@@ -111,6 +111,18 @@
     "workflows": "Workflows",
     "editWorkflow": "Edit Workflow"
   },
+  "instagram": {
+    "title": "Instagram Integration",
+    "description": "Connect your Instagram account to share your creations directly from the canvas.",
+    "cardDescription": "Manage your Instagram connection status.",
+    "connectedAs": "Connected as",
+    "tokenExpired": "Session expired. Please reconnect.",
+    "notConnected": "Not connected to any account.",
+    "connect": "Connect Instagram",
+    "connecting": "Connecting...",
+    "disconnect": "Disconnect Account",
+    "disconnecting": "Disconnecting..."
+  },
   "saveSettings": "Save Settings",
   "close": "Close",
   "cancel": "Cancel"

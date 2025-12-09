@@ -10,6 +10,8 @@ import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { openDB } from 'idb'
 import { createRouter, RouterProvider } from '@tanstack/react-router'
+import InstagramConnectDialog from '@/components/canvas/InstagramConnectDialog'
+import { useEffect, useState } from 'react'
 import { Toaster } from 'sonner'
 import { routeTree } from './route-tree.gen'
 
@@ -64,6 +66,17 @@ const queryClient = new QueryClient({
 
 function App() {
   const { theme } = useTheme()
+  const [instagramDialogOpen, setInstagramDialogOpen] = useState(false)
+
+  // Check for Instagram auth callback
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search)
+    console.log('App URL Params Check:', window.location.search)
+    if (params.get('instagram_auth')) {
+      console.log('Found instagram_auth! Opening dialog...')
+      setInstagramDialogOpen(true)
+    }
+  }, [])
 
   return (
     <ThemeProvider defaultTheme={theme} storageKey="vite-ui-theme">
@@ -84,6 +97,12 @@ function App() {
 
               {/* Login Dialog */}
               <LoginDialog />
+
+              {/* Instagram Connect Dialog */}
+              <InstagramConnectDialog
+                open={instagramDialogOpen}
+                onOpenChange={setInstagramDialogOpen}
+              />
             </div>
           </ConfigsProvider>
         </AuthProvider>
