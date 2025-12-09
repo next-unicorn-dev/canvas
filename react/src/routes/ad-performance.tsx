@@ -190,7 +190,7 @@ function AdPerformance() {
                   <CardContent>
                     <div className="text-2xl font-bold">{formatNumber(totalLikes)}</div>
                     <p className="text-xs text-muted-foreground mt-1">
-                      {t('canvas:avgLikesPerPost', { count: formatNumber(avgLikes), defaultValue: `Avg. ${formatNumber(avgLikes)} likes per post` })}
+                      {t('canvas:avgLikesPerPost', { count: formatNumber(avgLikes) })}
                     </p>
                   </CardContent>
                 </Card>
