@@ -193,6 +193,36 @@ async def upload_to_instagram(
         user = await auth_service.validate_token(token)
         user_id = user["id"]
         
+        # Handle Local File -> S3 Upload
+        image_url = request.image_url
+        if "localhost" in image_url or "127.0.0.1" in image_url:
+            # It's a local file, upload to S3 first
+            try:
+                # Extract filename from URL
+                filename = image_url.split("/")[-1]
+                
+                # Construct local file path
+                from services.config_service import FILES_DIR
+                file_path = os.path.join(FILES_DIR, filename)
+                
+                if os.path.exists(file_path):
+                    from services.s3_service import s3_service
+                    if s3_service.enabled:
+                        s3_url = s3_service.upload_file(file_path)
+                        if s3_url:
+                            image_url = s3_url
+                            print(f"Uploaded local file to S3: {s3_url}")
+                        else:
+                            raise ValueError("Failed to upload image to S3")
+                    else:
+                        raise ValueError("AWS S3 is not configured. Cannot upload local image to Instagram.")
+                else:
+                    # URL might be localhost but not in our file system (e.g. different port?)
+                    print(f"Warning: Local file not found at {file_path}, trying original URL")
+            except Exception as e:
+                print(f"Error processing local file: {e}")
+                raise ValueError(f"Failed to process local image: {str(e)}")
+
         # 캡션과 해시태그 결합
         caption = request.caption
         if request.hashtags:
@@ -207,7 +237,7 @@ async def upload_to_instagram(
         
         result = await instagram_service.upload_image(
             user_id=user_id,
-            image_url=request.image_url,
+            image_url=image_url, # Use the (possibly updated) S3 URL
             caption=caption,
         )
         

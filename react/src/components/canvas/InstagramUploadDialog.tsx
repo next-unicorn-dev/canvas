@@ -230,7 +230,7 @@ export default function InstagramUploadDialog({
         const blob = await fetch(imageUrl).then(r => r.blob())
         formData.append('file', blob, 'image.png')
         
-        const uploadResponse = await fetch('/api/upload', {
+        const uploadResponse = await fetch('/api/upload_image', {
           method: 'POST',
           body: formData,
         })
