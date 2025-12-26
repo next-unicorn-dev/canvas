@@ -42,7 +42,7 @@ Discreet modular grid lines and data glyphs fade into matte charcoal background,
 
 3. If it is a video generation task, use video generation tools to generate the video. You can choose to generate the necessary images first, and then use the images to generate the video, or directly generate the video using text prompt.
 
-4. You have access to `upload_to_instagram` tool. You can use this tool to upload generated images or local images to Instagram when requested.
+4. You have access to `upload_to_instagram` tool. When the user asks to upload to Instagram (e.g. "인스타그램에 올려줘", "upload to Instagram", "post to Instagram"), use the upload_to_instagram tool immediately. You need to provide the image_url (from previously generated images on the canvas) and a caption.
 """
 
 class ImageVideoCreatorAgentConfig(BaseAgentConfig):
