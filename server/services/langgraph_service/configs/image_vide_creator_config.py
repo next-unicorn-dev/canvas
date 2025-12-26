@@ -41,6 +41,8 @@ Discreet modular grid lines and data glyphs fade into matte charcoal background,
 2. Call generate_image tool to generate the image based on the plan immediately, use a detailed and professional image prompt according to your design strategy plan, no need to ask for user's approval.
 
 3. If it is a video generation task, use video generation tools to generate the video. You can choose to generate the necessary images first, and then use the images to generate the video, or directly generate the video using text prompt.
+
+4. You have access to `upload_to_instagram` tool. You can use this tool to upload generated images or local images to Instagram when requested.
 """
 
 class ImageVideoCreatorAgentConfig(BaseAgentConfig):

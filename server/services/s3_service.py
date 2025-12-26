@@ -38,6 +38,8 @@ class S3Service:
 
         try:
             # Upload the file
+            # Note: We are not setting ACL='public-read' here because many new buckets verify permissions via Bucket Policy only.
+            # If your bucket relies on ACLs, you might need to add: ExtraArgs={'ContentType': content_type, 'ACL': 'public-read'}
             self.s3.upload_file(
                 file_path, 
                 self.bucket_name, 
@@ -59,4 +61,3 @@ class S3Service:
             raise
 
 s3_service = S3Service()
-

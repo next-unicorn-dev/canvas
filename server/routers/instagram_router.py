@@ -247,14 +247,18 @@ async def upload_to_instagram(
             "data": result,
         }
     except ValueError as e:
+        print(f"ValueError in upload_to_instagram: {repr(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            detail=f"Value Error: {str(e)}"
         )
     except Exception as e:
+        print(f"Unexpected error in upload_to_instagram: {repr(e)}")
+        import traceback
+        traceback.print_exc()
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Failed to upload image: {str(e)}"
+            detail=f"Internal Error: {repr(e)}"
         )
 
 

@@ -4,6 +4,7 @@ from langchain_core.tools import BaseTool
 from models.tool_model import ToolInfo
 from tools.comfy_dynamic import build_tool
 from tools.write_plan import write_plan_tool
+from tools.upload_to_instagram import upload_to_instagram
 from tools.generate_image_by_imagen_4_replicate import (
     generate_image_by_imagen_4_replicate,
 )
@@ -144,8 +145,12 @@ class ToolService:
                 "provider": "system",
                 "tool_function": write_plan_tool,
             }
+            self.tools["upload_to_instagram"] = {
+                "provider": "system",
+                "tool_function": upload_to_instagram,
+            }
         except ImportError as e:
-            print(f"❌ 注册必须工具失败 write_plan: {e}")
+            print(f"❌ 注册必须工具失败: {e}")
 
     def register_tool(self, tool_id: str, tool_info: ToolInfo):
         """注册单个工具"""

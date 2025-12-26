@@ -38,6 +38,15 @@ class AgentManager:
         print(f"📸 Image tools: {image_tools}")
         print(f"🎬 Video tools: {video_tools}")
 
+        # Ensure upload_to_instagram is always available to image_video_creator
+        if not any(t.get('id') == 'upload_to_instagram' for t in tool_list):
+            tool_list.append({
+                'id': 'upload_to_instagram',
+                'provider': 'system',
+                'type': 'tool',
+                'display_name': 'Upload to Instagram'
+            })
+
         planner_config = PlannerAgentConfig()
         # Add custom system prompt to planner if provided
         if system_prompt:

@@ -142,8 +142,14 @@ export async function uploadToInstagram(
   })
 
   if (!response.ok) {
-    const error = await response.json()
-    throw new Error(error.detail || 'Failed to upload image to Instagram')
+    let errorMessage = 'Failed to upload image to Instagram'
+    try {
+      const error = await response.json()
+      errorMessage = error.detail || error.message || JSON.stringify(error)
+    } catch (e) {
+      errorMessage = `Server Error: ${response.status} ${response.statusText}`
+    }
+    throw new Error(errorMessage)
   }
 
   return response.json()

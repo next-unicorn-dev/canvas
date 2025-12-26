@@ -121,4 +121,12 @@ if __name__ == "__main__":
     import uvicorn
     print("🌟Starting server, UI_DIST_DIR:", os.environ.get('UI_DIST_DIR'))
 
-    uvicorn.run(socket_app, host="127.0.0.1", port=args.port)
+    # Check for development environment
+    is_dev = os.environ.get("NODE_ENV") == "development"
+    
+    if is_dev:
+        print("🔥 Hot reload enabled")
+        uvicorn.run("main:socket_app", host="127.0.0.1", port=args.port, reload=True)
+    else:
+        uvicorn.run(socket_app, host="127.0.0.1", port=args.port)
+

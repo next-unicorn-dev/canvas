@@ -236,29 +236,45 @@ class InstagramService:
     ) -> Dict[str, Any]:
         """미디어 컨테이너 생성 (이미지 업로드 준비)"""
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{self.BASE_URL}/{ig_user_id}/media",
-                params={
-                    "image_url": image_url,
-                    "caption": caption,
-                    "access_token": access_token,
-                },
-            )
-            response.raise_for_status()
-            return response.json()
+            try:
+                response = await client.post(
+                    f"{self.BASE_URL}/{ig_user_id}/media",
+                    params={
+                        "image_url": image_url,
+                        "caption": caption,
+                        "access_token": access_token,
+                    },
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                print(f"Instagram API Error: {e.response.text}")
+                raise ValueError(f"Instagram API Error: {e.response.text}")
+            except Exception as e:
+                print(f"Unexpected error in create_media_container: {repr(e)}")
+                raise
+
     
     async def publish_media(self, access_token: str, creation_id: str, ig_user_id: str) -> Dict[str, Any]:
         """미디어 컨테이너를 실제 포스트로 발행"""
         async with httpx.AsyncClient() as client:
-            response = await client.post(
-                f"{self.BASE_URL}/{ig_user_id}/media_publish",
-                params={
-                    "creation_id": creation_id,
-                    "access_token": access_token,
-                },
-            )
-            response.raise_for_status()
-            return response.json()
+            try:
+                response = await client.post(
+                    f"{self.BASE_URL}/{ig_user_id}/media_publish",
+                    params={
+                        "creation_id": creation_id,
+                        "access_token": access_token,
+                    },
+                )
+                response.raise_for_status()
+                return response.json()
+            except httpx.HTTPStatusError as e:
+                print(f"Instagram Publish API Error: {e.response.text}")
+                raise ValueError(f"Instagram Publish API Error: {e.response.text}")
+            except Exception as e:
+                print(f"Unexpected error in publish_media: {repr(e)}")
+                raise
+
     
     async def upload_image(
         self,
