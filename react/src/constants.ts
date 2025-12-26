@@ -1,5 +1,3 @@
-import type { LLMConfig, ToolCallFunctionName } from '@/types/types'
-
 // API Configuration
 const resolveBaseApiUrl = () => {
   const envUrl =
@@ -32,13 +30,13 @@ export const PROVIDER_NAME_MAPPING: {
 }
 
 // Tool call name mapping
-export const TOOL_CALL_NAME_MAPPING: { [key in ToolCallFunctionName]: string } =
-{
+export const TOOL_CALL_NAME_MAPPING: { [key: string]: string } = {
   generate_image: 'Generate Image',
   prompt_user_multi_choice: 'Prompt Multi-Choice',
   prompt_user_single_choice: 'Prompt Single-Choice',
   write_plan: 'Write Plan',
   finish: 'Finish',
+  upload_to_instagram: 'Upload to Instagram',
 }
 
 export const LOGO_URL = '/logo.png'

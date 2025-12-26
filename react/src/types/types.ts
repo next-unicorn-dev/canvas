@@ -7,6 +7,8 @@ export type ToolCallFunctionName =
   | 'prompt_user_single_choice'
   | 'write_plan'
   | 'finish'
+  | 'upload_to_instagram'
+  | string // Allow any tool name for dynamic tools
 
 export type ToolCall = {
   id: string

@@ -3,20 +3,22 @@ from .base_config import BaseAgentConfig, HandoffConfig
 
 
 class PlannerAgentConfig(BaseAgentConfig):
-    """规划智能体 - 负责制定执行计划
+    """규획 에이전트 - 실행 계획 수립 담당
     """
 
     def __init__(self) -> None:
         system_prompt = """
             You are a design planning writing agent. Answer and write plan in the SAME LANGUAGE as the user's prompt. You should do:
             - Step 1. If it is a complex task requiring multiple steps, write a execution plan for the user's request using the SAME LANGUAGE AS THE USER'S PROMPT. You should breakdown the task into high level steps for the other agents to execute.
-            - Step 2. If it is a image/video generation, editing, or Instagram upload task, transfer the task to image_video_creator agent IMMEDIATELY, no need to ask for user's approval.
+            - Step 2. Transfer to the appropriate agent based on the task type:
+              - For image/video generation or editing tasks → transfer to image_video_creator agent
+              - For Instagram upload requests → transfer to instagram_uploader agent
 
             IMPORTANT RULES:
             1. You MUST complete the write_plan tool call and wait for its result BEFORE attempting to transfer to another agent
             2. Do NOT call multiple tools simultaneously
             3. Always wait for the result of one tool call before making another
-            4. When user asks to upload to Instagram (e.g. "인스타그램에 올려줘", "upload to Instagram", "post to Instagram"), transfer to image_video_creator agent who has the upload_to_instagram tool.
+            4. When user asks to upload to Instagram (e.g. "인스타그램에 올려줘", "upload to Instagram", "post to Instagram"), transfer to instagram_uploader agent DIRECTLY.
 
             ALWAYS PAY ATTENTION TO IMAGE QUANTITY!
             - If user specifies a number (like "20 images", "generate 15 pictures"), you MUST include this exact number in your plan
@@ -43,7 +45,13 @@ class PlannerAgentConfig(BaseAgentConfig):
             {
                 'agent_name': 'image_video_creator',
                 'description': """
-                        Transfer user to the image_video_creator. About this agent: Specialize in generating images, videos, AND uploading images to Instagram. Transfer here when user asks for image generation, video generation, or Instagram upload.
+                        Transfer user to the image_video_creator. About this agent: Specialize in generating images and videos. Transfer here when user asks for image generation or video generation tasks.
+                        """
+            },
+            {
+                'agent_name': 'instagram_uploader',
+                'description': """
+                        Transfer user to the instagram_uploader. About this agent: Specialize in uploading images to Instagram. Transfer here when user explicitly asks to upload or post images to Instagram.
                         """
             }
         ]

@@ -4,6 +4,7 @@ from langgraph.graph.graph import CompiledGraph
 from langchain_core.tools import BaseTool
 from models.tool_model import ToolInfoJson
 from services.langgraph_service.configs.image_vide_creator_config import ImageVideoCreatorAgentConfig
+from services.langgraph_service.configs.instagram_uploader_config import InstagramUploaderAgentConfig
 from .configs import PlannerAgentConfig, create_handoff_tool, BaseAgentConfig
 from services.tool_service import tool_service
 
@@ -38,15 +39,6 @@ class AgentManager:
         print(f"📸 Image tools: {image_tools}")
         print(f"🎬 Video tools: {video_tools}")
 
-        # Ensure upload_to_instagram is always available to image_video_creator
-        if not any(t.get('id') == 'upload_to_instagram' for t in tool_list):
-            tool_list.append({
-                'id': 'upload_to_instagram',
-                'provider': 'system',
-                'type': 'tool',
-                'display_name': 'Upload to Instagram'
-            })
-
         planner_config = PlannerAgentConfig()
         # Add custom system prompt to planner if provided
         if system_prompt:
@@ -75,7 +67,13 @@ class AgentManager:
         image_video_creator_agent = AgentManager._create_langgraph_agent(
             model, image_video_creator_config)
 
-        return [planner_agent, image_video_creator_agent]
+        # Create Instagram uploader agent
+        instagram_uploader_config = InstagramUploaderAgentConfig()
+        instagram_uploader_agent = AgentManager._create_langgraph_agent(
+            model, instagram_uploader_config)
+        print(f'📷 Instagram uploader agent created')
+
+        return [planner_agent, image_video_creator_agent, instagram_uploader_agent]
 
     @staticmethod
     def _create_langgraph_agent(
