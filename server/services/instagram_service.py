@@ -235,7 +235,7 @@ class InstagramService:
         ig_user_id: str,
     ) -> Dict[str, Any]:
         """미디어 컨테이너 생성 (이미지 업로드 준비)"""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 response = await client.post(
                     f"{self.BASE_URL}/{ig_user_id}/media",
@@ -257,7 +257,7 @@ class InstagramService:
     
     async def publish_media(self, access_token: str, creation_id: str, ig_user_id: str) -> Dict[str, Any]:
         """미디어 컨테이너를 실제 포스트로 발행"""
-        async with httpx.AsyncClient() as client:
+        async with httpx.AsyncClient(timeout=60.0) as client:
             try:
                 response = await client.post(
                     f"{self.BASE_URL}/{ig_user_id}/media_publish",
