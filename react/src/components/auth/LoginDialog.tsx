@@ -3,16 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '../ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '../ui/dialog'
 import { Input } from '../ui/input'
-import { login, register, saveAuthData } from '../../api/auth'
-import { useAuth } from '../../contexts/AuthContext'
-import { useConfigs, useRefreshModels } from '../../contexts/configs'
+import { useConfigs } from '../../contexts/configs'
+import { useLogin, useRegister } from '@/hooks/use-auth'
 
 type AuthMode = 'login' | 'register'
 
 export function LoginDialog() {
-  const { refreshAuth } = useAuth()
   const { showLoginDialog: open, setShowLoginDialog } = useConfigs()
-  const refreshModels = useRefreshModels()
   const { t } = useTranslation()
 
   const [mode, setMode] = useState<AuthMode>('login')
@@ -20,9 +17,13 @@ export function LoginDialog() {
   const [username, setUsername] = useState('')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [isSubmitting, setIsSubmitting] = useState(false)
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
   const [successMessage, setSuccessMessage] = useState<string | null>(null)
+
+  const loginMutation = useLogin()
+  const registerMutation = useRegister()
+
+  const isSubmitting = loginMutation.isPending || registerMutation.isPending
 
   useEffect(() => {
     if (!open) {
@@ -36,9 +37,10 @@ export function LoginDialog() {
     setUsername('')
     setEmail('')
     setPassword('')
-    setIsSubmitting(false)
     setErrorMessage(null)
     setSuccessMessage(null)
+    loginMutation.reset()
+    registerMutation.reset()
   }
 
   const handleSubmit = async (event: FormEvent) => {
@@ -59,41 +61,48 @@ export function LoginDialog() {
       return
     }
 
-    try {
-      setIsSubmitting(true)
-
-      if (mode === 'login') {
-        const response = await login(identifier.trim(), password)
-        saveAuthData(response.token, response.user_info)
-        setSuccessMessage(t('common:auth.loginSuccessMessage'))
-      } else {
-        const response = await register(
-          username.trim(),
-          email.trim(),
-          password
-        )
-        saveAuthData(response.token, response.user_info)
-        setSuccessMessage(t('common:auth.registerSuccessMessage'))
-      }
-
-      await refreshAuth()
-      refreshModels()
-
-      setTimeout(() => {
-        setShowLoginDialog(false)
-        resetForm()
-      }, 800)
-    } catch (error) {
-      console.error('Authentication failed:', error)
-      const message =
-        error instanceof Error
-          ? error.message
-          : mode === 'login'
-          ? t('common:auth.loginRequestFailed')
-          : t('common:auth.registerFailed')
-      setErrorMessage(message)
-    } finally {
-      setIsSubmitting(false)
+    if (mode === 'login') {
+      loginMutation.mutate(
+        { identifier: identifier.trim(), password },
+        {
+          onSuccess: () => {
+            setSuccessMessage(t('common:auth.loginSuccessMessage'))
+            // Reload page to reset all state after successful login
+            setTimeout(() => {
+              window.location.reload()
+            }, 800)
+          },
+          onError: (error) => {
+            console.error('Login failed:', error)
+            const message =
+              error instanceof Error
+                ? error.message
+                : t('common:auth.loginRequestFailed')
+            setErrorMessage(message)
+          },
+        }
+      )
+    } else {
+      registerMutation.mutate(
+        { username: username.trim(), email: email.trim(), password },
+        {
+          onSuccess: () => {
+            setSuccessMessage(t('common:auth.registerSuccessMessage'))
+            // Reload page to reset all state after successful registration
+            setTimeout(() => {
+              window.location.reload()
+            }, 800)
+          },
+          onError: (error) => {
+            console.error('Registration failed:', error)
+            const message =
+              error instanceof Error
+                ? error.message
+                : t('common:auth.registerFailed')
+            setErrorMessage(message)
+          },
+        }
+      )
     }
   }
 
@@ -107,8 +116,8 @@ export function LoginDialog() {
     mode === 'login'
       ? identifier.trim().length > 0 && password.trim().length > 0
       : username.trim().length > 0 &&
-        email.trim().length > 0 &&
-        password.trim().length > 0
+      email.trim().length > 0 &&
+      password.trim().length > 0
 
   return (
     <Dialog open={open} onOpenChange={setShowLoginDialog}>
@@ -177,8 +186,8 @@ export function LoginDialog() {
               {isSubmitting
                 ? t('common:auth.processing')
                 : mode === 'login'
-                ? t('common:auth.login')
-                : t('common:auth.register')}
+                  ? t('common:auth.login')
+                  : t('common:auth.register')}
             </Button>
           </form>
 

@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProductsIndexRouteImport } from './routes/products/index'
+import { Route as MyPostsIndexRouteImport } from './routes/my-posts/index'
 import { Route as KnowledgeIndexRouteImport } from './routes/knowledge/index'
 import { Route as ExploreIndexRouteImport } from './routes/explore/index'
 import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
@@ -24,6 +26,16 @@ import { Route as AdminTemplateAddRouteImport } from './routes/admin/template.ad
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductsIndexRoute = ProductsIndexRouteImport.update({
+  id: '/products/',
+  path: '/products/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MyPostsIndexRoute = MyPostsIndexRouteImport.update({
+  id: '/my-posts/',
+  path: '/my-posts/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KnowledgeIndexRoute = KnowledgeIndexRouteImport.update({
@@ -88,6 +100,8 @@ export interface FileRoutesByFullPath {
   '/canvas': typeof CanvasIndexRoute
   '/explore': typeof ExploreIndexRoute
   '/knowledge': typeof KnowledgeIndexRoute
+  '/my-posts': typeof MyPostsIndexRoute
+  '/products': typeof ProductsIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRoutesByTo {
@@ -101,6 +115,8 @@ export interface FileRoutesByTo {
   '/canvas': typeof CanvasIndexRoute
   '/explore': typeof ExploreIndexRoute
   '/knowledge': typeof KnowledgeIndexRoute
+  '/my-posts': typeof MyPostsIndexRoute
+  '/products': typeof ProductsIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRoutesById {
@@ -115,6 +131,8 @@ export interface FileRoutesById {
   '/canvas/': typeof CanvasIndexRoute
   '/explore/': typeof ExploreIndexRoute
   '/knowledge/': typeof KnowledgeIndexRoute
+  '/my-posts/': typeof MyPostsIndexRoute
+  '/products/': typeof ProductsIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRouteTypes {
@@ -130,6 +148,8 @@ export interface FileRouteTypes {
     | '/canvas'
     | '/explore'
     | '/knowledge'
+    | '/my-posts'
+    | '/products'
     | '/admin/template/add'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -143,6 +163,8 @@ export interface FileRouteTypes {
     | '/canvas'
     | '/explore'
     | '/knowledge'
+    | '/my-posts'
+    | '/products'
     | '/admin/template/add'
   id:
     | '__root__'
@@ -156,6 +178,8 @@ export interface FileRouteTypes {
     | '/canvas/'
     | '/explore/'
     | '/knowledge/'
+    | '/my-posts/'
+    | '/products/'
     | '/admin/template/add'
   fileRoutesById: FileRoutesById
 }
@@ -170,6 +194,8 @@ export interface RootRouteChildren {
   CanvasIndexRoute: typeof CanvasIndexRoute
   ExploreIndexRoute: typeof ExploreIndexRoute
   KnowledgeIndexRoute: typeof KnowledgeIndexRoute
+  MyPostsIndexRoute: typeof MyPostsIndexRoute
+  ProductsIndexRoute: typeof ProductsIndexRoute
   AdminTemplateAddRoute: typeof AdminTemplateAddRoute
 }
 
@@ -180,6 +206,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/products/': {
+      id: '/products/'
+      path: '/products'
+      fullPath: '/products'
+      preLoaderRoute: typeof ProductsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/my-posts/': {
+      id: '/my-posts/'
+      path: '/my-posts'
+      fullPath: '/my-posts'
+      preLoaderRoute: typeof MyPostsIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/knowledge/': {
@@ -266,6 +306,8 @@ const rootRouteChildren: RootRouteChildren = {
   CanvasIndexRoute: CanvasIndexRoute,
   ExploreIndexRoute: ExploreIndexRoute,
   KnowledgeIndexRoute: KnowledgeIndexRoute,
+  MyPostsIndexRoute: MyPostsIndexRoute,
+  ProductsIndexRoute: ProductsIndexRoute,
   AdminTemplateAddRoute: AdminTemplateAddRoute,
 }
 export const routeTree = rootRouteImport

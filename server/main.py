@@ -12,10 +12,11 @@ sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8")
 print('Importing websocket_router')
 from routers.websocket_router import *  # DO NOT DELETE THIS LINE, OTHERWISE, WEBSOCKET WILL NOT WORK
 print('Importing routers')
-from routers import auth_router, config_router, image_router, root_router, workspace, canvas, ssl_test, chat_router, settings, tool_confirmation, instagram_router, admin_router, ad_performance_router
+from routers import auth_router, config_router, image_router, root_router, workspace, canvas, ssl_test, chat_router, settings, tool_confirmation, instagram_router, admin_router, ad_performance_router, products_router, ad_library_router
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import argparse
 from contextlib import asynccontextmanager
 from starlette.types import Scope
@@ -64,6 +65,15 @@ app = FastAPI(
     openapi_url="/openapi.json"
 )
 
+# Add CORS middleware
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Allow all origins for development
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Include routers
 print('Including routers')
 app.include_router(auth_router.router)
@@ -79,6 +89,8 @@ app.include_router(tool_confirmation.router)
 app.include_router(instagram_router.router)
 app.include_router(admin_router.router)
 app.include_router(ad_performance_router.router)
+app.include_router(products_router.router)
+app.include_router(ad_library_router.router)
 
 # Mount the React build directory
 react_build_dir = os.environ.get('UI_DIST_DIR', os.path.join(

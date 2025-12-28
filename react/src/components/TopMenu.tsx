@@ -1,7 +1,7 @@
 import { useConfigs } from '@/contexts/configs'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import { ChevronLeft, ImageIcon, Compass, BarChart3, Shield, TrendingUp } from 'lucide-react'
+import { ChevronLeft, ImageIcon, Compass, BarChart3, Shield, TrendingUp, Package, FileImage } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from '@tanstack/react-router'
@@ -47,6 +47,15 @@ export default function TopMenu({
           <img src={LOGO_URL} alt="logo" className="h-6 w-auto" draggable={false} />
         </motion.div>
         <Button
+          variant={window.location.pathname === '/products' ? 'default' : 'ghost'}
+          size="sm"
+          className={cn('flex items-center font-bold rounded-none')}
+          onClick={() => navigate({ to: '/products' })}
+        >
+          <Package className="size-4" />
+          {t('canvas:products', '내 상품 관리')}
+        </Button>
+        <Button
           variant={window.location.pathname === '/brand-analysis' ? 'default' : 'ghost'}
           size="sm"
           className={cn('flex items-center font-bold rounded-none')}
@@ -65,13 +74,22 @@ export default function TopMenu({
           {t('canvas:assets', 'Library')}
         </Button>
         <Button
+          variant={window.location.pathname === '/my-posts' ? 'default' : 'ghost'}
+          size="sm"
+          className={cn('flex items-center font-bold rounded-none')}
+          onClick={() => navigate({ to: '/my-posts' })}
+        >
+          <FileImage className="size-4" />
+          {t('canvas:myPosts', '내 게시물')}
+        </Button>
+        <Button
           variant={window.location.pathname === '/explore' ? 'default' : 'ghost'}
           size="sm"
           className={cn('flex items-center font-bold rounded-none')}
           onClick={() => navigate({ to: '/explore' })}
         >
           <Compass className="size-4" />
-          {t('canvas:explore', 'Explore')}
+          {t('canvas:explore', '탐색')}
         </Button>
         <Button
           variant={window.location.pathname === '/ad-performance' ? 'default' : 'ghost'}

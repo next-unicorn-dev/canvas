@@ -3,9 +3,8 @@ SQLAlchemy ORM Models for database tables.
 """
 
 from datetime import datetime
-from typing import Optional
 from sqlalchemy import (
-    Column, String, Text, Integer, DateTime, ForeignKey, Index
+    Column, String, Text, Integer, DateTime, ForeignKey, Index, Boolean, Numeric
 )
 from sqlalchemy.orm import DeclarativeBase, relationship
 
@@ -41,6 +40,7 @@ class User(Base):
     auth_tokens = relationship("AuthToken", back_populates="user", cascade="all, delete-orphan")
     brand_info = relationship("BrandInfo", back_populates="user", uselist=False, cascade="all, delete-orphan")
     instagram_tokens = relationship("InstagramToken", back_populates="user", uselist=False, cascade="all, delete-orphan")
+    products = relationship("Product", back_populates="user", cascade="all, delete-orphan")
 
 
 class AuthToken(Base):
@@ -167,4 +167,40 @@ class InstagramToken(Base):
     
     # Relationships
     user = relationship("User", back_populates="instagram_tokens")
+
+
+class Product(Base):
+    """Product model for user's products."""
+    __tablename__ = "products"
+    
+    id = Column(String(36), primary_key=True)
+    user_id = Column(String(36), ForeignKey("users.id", ondelete="CASCADE"), nullable=False)
+    
+    # Required fields
+    name = Column(String(255), nullable=False)  # 상품명
+    image_url = Column(Text, nullable=False)  # 상품이미지
+    
+    # Optional fields
+    brand = Column(String(255))  # 브랜드 (선택)
+    category = Column(String(255))  # 상품 카테고리 (선택)
+    price = Column(Numeric(12, 2))  # 가격 (선택)
+    currency = Column(String(10), default="KRW")  # 통화 (KRW, USD 등)
+    has_discount = Column(Boolean, default=False)  # 할인유무
+    discount_price = Column(Numeric(12, 2))  # 할인가 (선택)
+    highlight_points = Column(Text)  # 강조 포인트 (선택)
+    
+    # Targeting fields
+    target_country = Column(String(100))  # 타겟 국가 (선택)
+    target_gender = Column(String(20))  # 타겟 성별: all, male, female (선택)
+    target_age_group = Column(String(50))  # 타겟 연령대: 예) 20-30, 30-40 (선택)
+    
+    created_at = Column(DateTime, default=datetime.utcnow)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    
+    # Relationships
+    user = relationship("User", back_populates="products")
+    
+    __table_args__ = (
+        Index("idx_products_user_id", "user_id"),
+    )
 

@@ -1,6 +1,7 @@
 // API Configuration
 const resolveBaseApiUrl = () => {
   const envUrl =
+    import.meta.env.VITE_API_URL?.trim() ||
     import.meta.env.VITE_PRISM_BASE_API_URL?.trim() ||
     import.meta.env.VITE__BASE_API_URL?.trim()
   if (envUrl) {

@@ -3,13 +3,14 @@ from fastapi.concurrency import run_in_threadpool
 from common import DEFAULT_PORT
 from tools.utils.image_canvas_utils import generate_file_id
 from services.config_service import FILES_DIR
+from services.s3_service import s3_service
 
 from PIL import Image
 from io import BytesIO
 import os
+import uuid
 from fastapi import APIRouter, HTTPException, UploadFile, File
 import httpx
-import aiofiles
 from mimetypes import guess_type
 from utils.http_client import HttpClient
 
@@ -152,6 +153,104 @@ def compress_image(img: Image.Image, max_size_mb: float) -> bytes:
     buffer = BytesIO()
     resized_img.save(buffer, format='JPEG', quality=30, optimize=True)
     return buffer.getvalue()
+
+
+# S3 이미지 업로드 인터페이스
+@router.post("/upload_image_s3", summary="S3 이미지 업로드", tags=["Image"])
+async def upload_image_s3(file: UploadFile = File(...), max_size_mb: float = 3.0):
+    """
+    이미지를 S3에 업로드합니다.
+
+    Args:
+        file: 업로드할 이미지 파일
+        max_size_mb: 최대 파일 크기 (MB), 기본값 3.0
+
+    Returns:
+        dict: 파일 ID, 너비, 높이, S3 URL을 포함하는 응답
+    """
+    if not s3_service.enabled:
+        raise HTTPException(status_code=503, detail="S3 서비스가 설정되지 않았습니다. AWS 자격 증명을 확인하세요.")
+    
+    print('🦄upload_image_s3 file', file.filename)
+    
+    # 파일 ID 생성
+    file_id = str(uuid.uuid4())
+    filename = file.filename or ''
+
+    # Read the file content
+    try:
+        content = await file.read()
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"파일 읽기 오류: {e}")
+    
+    original_size_mb = len(content) / (1024 * 1024)
+
+    # Open the image from bytes to get its dimensions
+    with Image.open(BytesIO(content)) as img:
+        width, height = img.size
+        
+        # Determine the file extension
+        mime_type, _ = guess_type(filename)
+        if mime_type and mime_type.startswith('image/'):
+            extension = mime_type.split('/')[-1]
+            if extension == 'jpeg':
+                extension = 'jpg'
+        else:
+            extension = 'jpg'
+        
+        # Check if compression is needed
+        if original_size_mb > max_size_mb:
+            print(f'🦄 Image size ({original_size_mb:.2f}MB) exceeds limit ({max_size_mb}MB), compressing...')
+            
+            # Convert to RGB if necessary
+            if img.mode in ('RGBA', 'LA', 'P'):
+                background = Image.new('RGB', img.size, (255, 255, 255))
+                if img.mode == 'P':
+                    img = img.convert('RGBA')
+                background.paste(img, mask=img.split()[-1] if img.mode == 'RGBA' else None)
+                img = background
+            elif img.mode != 'RGB':
+                img = img.convert('RGB')
+            
+            # Compress the image
+            compressed_content = compress_image(img, max_size_mb)
+            extension = 'jpg'
+            
+            # Save compressed image to temp file
+            temp_path = os.path.join(FILES_DIR, f'{file_id}.{extension}')
+            with Image.open(BytesIO(compressed_content)) as compressed_img:
+                width, height = compressed_img.size
+                await run_in_threadpool(compressed_img.save, temp_path, format='JPEG', quality=95, optimize=True)
+        else:
+            # Save original image to temp file
+            temp_path = os.path.join(FILES_DIR, f'{file_id}.{extension}')
+            
+            save_format = 'JPEG' if extension.lower() in ['jpg', 'jpeg'] else extension.upper()
+            if save_format == 'JPEG':
+                img = img.convert('RGB')
+            
+            await run_in_threadpool(img.save, temp_path, format=save_format)
+    
+    # Upload to S3
+    try:
+        object_name = f'products/{file_id}.{extension}'
+        s3_url = s3_service.upload_file(temp_path, object_name)
+        
+        # Clean up temp file
+        os.remove(temp_path)
+        
+        print('🦄upload_image_s3 s3_url', s3_url)
+        return {
+            'file_id': f'{file_id}.{extension}',
+            'url': s3_url,
+            'width': width,
+            'height': height,
+        }
+    except Exception as e:
+        # Clean up temp file on error
+        if os.path.exists(temp_path):
+            os.remove(temp_path)
+        raise HTTPException(status_code=500, detail=f"S3 업로드 실패: {str(e)}")
 
 
 # 파일 다운로드 인터페이스

@@ -13,7 +13,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from .connection import DatabaseConnection, get_db_session
 from .models import (
     Base, DBVersion, User, AuthToken, Canvas, ChatSession, 
-    ChatMessage, ComfyWorkflow, BrandInfo, InstagramToken
+    ChatMessage, ComfyWorkflow, BrandInfo, InstagramToken, Product
 )
 
 
@@ -558,6 +558,119 @@ class DatabaseService:
             await session.execute(
                 delete(InstagramToken).where(InstagramToken.user_id == user_id)
             )
+    
+    # ==================== Product Operations ====================
+    
+    async def create_product(
+        self,
+        *,
+        product_id: str,
+        user_id: str,
+        name: str,
+        image_url: str,
+        brand: Optional[str] = None,
+        category: Optional[str] = None,
+        price: Optional[float] = None,
+        currency: str = "KRW",
+        has_discount: bool = False,
+        discount_price: Optional[float] = None,
+        highlight_points: Optional[str] = None,
+        target_country: Optional[str] = None,
+        target_gender: Optional[str] = None,
+        target_age_group: Optional[str] = None,
+    ) -> Dict[str, Any]:
+        """Create a new product."""
+        async with get_db_session() as session:
+            product = Product(
+                id=product_id,
+                user_id=user_id,
+                name=name,
+                image_url=image_url,
+                brand=brand,
+                category=category,
+                price=price,
+                currency=currency,
+                has_discount=has_discount,
+                discount_price=discount_price,
+                highlight_points=highlight_points,
+                target_country=target_country,
+                target_gender=target_gender,
+                target_age_group=target_age_group,
+            )
+            session.add(product)
+            return self._product_to_dict(product)
+    
+    async def get_product(self, product_id: str) -> Optional[Dict[str, Any]]:
+        """Get a product by ID."""
+        async with get_db_session() as session:
+            result = await session.execute(
+                select(Product).where(Product.id == product_id)
+            )
+            product = result.scalar_one_or_none()
+            if product:
+                return self._product_to_dict(product)
+            return None
+    
+    async def get_products_by_user(self, user_id: str) -> List[Dict[str, Any]]:
+        """Get all products for a user."""
+        async with get_db_session() as session:
+            result = await session.execute(
+                select(Product)
+                .where(Product.user_id == user_id)
+                .order_by(Product.created_at.desc())
+            )
+            products = result.scalars().all()
+            return [self._product_to_dict(p) for p in products]
+    
+    async def update_product(
+        self,
+        product_id: str,
+        **kwargs
+    ) -> Optional[Dict[str, Any]]:
+        """Update a product."""
+        async with get_db_session() as session:
+            # Filter out None values to only update provided fields
+            update_data = {k: v for k, v in kwargs.items() if v is not None}
+            if not update_data:
+                return await self.get_product(product_id)
+            
+            update_data["updated_at"] = datetime.utcnow()
+            
+            await session.execute(
+                update(Product)
+                .where(Product.id == product_id)
+                .values(**update_data)
+            )
+            return await self.get_product(product_id)
+    
+    async def delete_product(self, product_id: str) -> bool:
+        """Delete a product."""
+        async with get_db_session() as session:
+            result = await session.execute(
+                delete(Product).where(Product.id == product_id)
+            )
+            return result.rowcount > 0
+    
+    def _product_to_dict(self, product: Product) -> Dict[str, Any]:
+        """Convert Product model to dictionary."""
+        return {
+            "id": product.id,
+            "user_id": product.user_id,
+            "name": product.name,
+            "image_url": product.image_url,
+            "brand": product.brand,
+            "category": product.category,
+            "price": float(product.price) if product.price else None,
+            "currency": product.currency,
+            "has_discount": product.has_discount,
+            "discount_price": float(product.discount_price) if product.discount_price else None,
+            "highlight_points": product.highlight_points,
+            "target_country": product.target_country,
+            "target_gender": product.target_gender,
+            "target_age_group": product.target_age_group,
+            "created_at": product.created_at.isoformat() if product.created_at else None,
+            "updated_at": product.updated_at.isoformat() if product.updated_at else None,
+        }
 
 
 # Create singleton instance

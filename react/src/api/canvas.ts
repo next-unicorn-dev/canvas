@@ -1,5 +1,6 @@
 import { CanvasData, Message, Session } from '@/types/types'
 import { ToolInfo } from '@/api/model'
+import { authenticatedFetch } from '@/api/auth'
 
 export type ListCanvasesResponse = {
   id: string
@@ -10,7 +11,7 @@ export type ListCanvasesResponse = {
 }
 
 export async function listCanvases(): Promise<ListCanvasesResponse[]> {
-  const response = await fetch('/api/canvas/list')
+  const response = await authenticatedFetch('/api/canvas/list')
   return await response.json()
 }
 
@@ -28,9 +29,8 @@ export async function createCanvas(data: {
 
   system_prompt: string
 }): Promise<{ id: string }> {
-  const response = await fetch('/api/canvas/create', {
+  const response = await authenticatedFetch('/api/canvas/create', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(data),
   })
   return await response.json()

@@ -1,50 +1,53 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useRef } from 'react'
 import { toast } from 'sonner'
-import { AuthStatus, getAuthStatus } from '../api/auth'
+import { AuthStatus } from '../api/auth'
 import { useTranslation } from 'react-i18next'
+import { useAuthStatus } from '@/hooks/use-auth'
 
 interface AuthContextType {
   authStatus: AuthStatus
   isLoading: boolean
-  refreshAuth: () => Promise<void>
+  refreshAuth: () => void
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
+const defaultAuthStatus: AuthStatus = {
+  status: 'logged_out',
+  is_logged_in: false,
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const { t } = useTranslation()
-  const [authStatus, setAuthStatus] = useState<AuthStatus>({
-    status: 'logged_out',
-    is_logged_in: false,
-  })
-  const [isLoading, setIsLoading] = useState(true)
+  const isInitialLoad = useRef(true)
 
-  const refreshAuth = async () => {
-    try {
-      setIsLoading(true)
-      const status = await getAuthStatus()
+  const { data: authStatus, isLoading, refetch } = useAuthStatus()
 
-      // Check if token expired based on the status returned by getAuthStatus
-      if (status.tokenExpired) {
-        toast.error(t('common.auth.authExpiredMessage'), {
-          duration: 5000,
-        })
-      }
-
-      setAuthStatus(status)
-    } catch (error) {
-      console.error(t('common.auth.authErrorMessage'), error)
-    } finally {
-      setIsLoading(false)
+  // Handle token expired toast
+  useEffect(() => {
+    if (authStatus?.tokenExpired && !isInitialLoad.current) {
+      toast.error(t('common:auth.authExpiredMessage'), {
+        duration: 5000,
+      })
     }
+
+    if (!isLoading) {
+      isInitialLoad.current = false
+    }
+  }, [authStatus?.tokenExpired, isLoading, t])
+
+  const refreshAuth = () => {
+    refetch()
   }
 
-  useEffect(() => {
-    refreshAuth()
-  }, [])
-
   return (
-    <AuthContext.Provider value={{ authStatus, isLoading, refreshAuth }}>
+    <AuthContext.Provider
+      value={{
+        authStatus: authStatus ?? defaultAuthStatus,
+        isLoading,
+        refreshAuth,
+      }}
+    >
       {children}
     </AuthContext.Provider>
   )

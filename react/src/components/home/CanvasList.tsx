@@ -6,23 +6,25 @@ import { AnimatePresence, motion } from 'motion/react'
 import { memo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Plus } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { nanoid } from 'nanoid'
 import { useConfigs } from '@/contexts/configs'
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 import { toast } from 'sonner'
+import { useAuth } from '@/contexts/AuthContext'
 
 const CanvasList: React.FC = () => {
   const { t } = useTranslation()
   const location = useLocation()
   const isHomePage = location.pathname === '/'
-  const { setInitCanvas, textModel, selectedTools } = useConfigs()
+  const { textModel, selectedTools } = useConfigs()
   const navigate = useNavigate()
+  const { authStatus, isLoading: isAuthLoading } = useAuth()
 
-  const { data: canvases, refetch } = useQuery({
+  const { data: canvases, refetch, isLoading: isCanvasLoading } = useQuery({
     queryKey: ['canvases'],
     queryFn: listCanvases,
-    enabled: isHomePage, // 每次进入首页时都重新查询
+    enabled: isHomePage && authStatus.is_logged_in, // Only fetch when logged in
     refetchOnMount: 'always',
   })
 
@@ -72,6 +74,35 @@ const CanvasList: React.FC = () => {
       tool_list: selectedTools || [],
       system_prompt: localStorage.getItem('system_prompt') || DEFAULT_SYSTEM_PROMPT,
     })
+  }
+
+  // Show loading state first (before checking login status)
+  if (isAuthLoading) {
+    return (
+      <div className="flex flex-col px-10 mt-10 gap-4 select-none max-w-[1200px] mx-auto">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <span className="ml-3 text-muted-foreground">{t('common:messages.loading')}</span>
+        </div>
+      </div>
+    )
+  }
+
+  // Don't show anything if not logged in (after auth loading is done)
+  if (!authStatus.is_logged_in) {
+    return null
+  }
+
+  // Show loading state for canvas list
+  if (isCanvasLoading) {
+    return (
+      <div className="flex flex-col px-10 mt-10 gap-4 select-none max-w-[1200px] mx-auto">
+        <div className="flex items-center justify-center py-20">
+          <Loader2 className="w-8 h-8 animate-spin text-muted-foreground" />
+          <span className="ml-3 text-muted-foreground">{t('common:messages.loading')}</span>
+        </div>
+      </div>
+    )
   }
 
   return (

@@ -24,3 +24,6 @@ dist-ssr
 
 # Build output
 dist/
+
+# TanStack Router temp files
+.tanstack/tmp/
