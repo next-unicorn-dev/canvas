@@ -1,93 +1,68 @@
 import TopMenu from '@/components/TopMenu'
 import { createFileRoute } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
-import { useState, useEffect } from 'react'
+import { useMemo } from 'react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { TrendingUp, Eye, MousePointerClick, Users, DollarSign, Calendar, Loader2, Instagram, Heart, MessageCircle, ExternalLink } from 'lucide-react'
+import { TrendingUp, Eye, MousePointerClick, Users, DollarSign, Calendar, Loader2, Instagram, Heart, MessageCircle, ExternalLink, RefreshCw } from 'lucide-react'
 import { motion } from 'motion/react'
-import { getAdPerformance } from '@/api/ad-performance'
-import { getInstagramMedia, getInstagramStatus, InstagramMedia } from '@/api/instagram'
 import { Button } from '@/components/ui/button'
 import { useConfigs } from '@/contexts/configs'
+import { useInstagramStatus, useInstagramMedia, useInvalidateInstagram } from '@/hooks/use-instagram'
+import { useAdPerformance } from '@/hooks/use-ad-performance'
 
-export const Route = createFileRoute('/ad-performance')({
+export const Route = createFileRoute('/ad-performance/')({
   component: AdPerformance,
 })
-
-interface AdPerformanceData {
-  totalImpressions: number
-  totalClicks: number
-  totalConversions: number
-  totalSpent: number
-  clickThroughRate: number
-  conversionRate: number
-  costPerClick: number
-  costPerConversion: number
-  campaigns: CampaignPerformance[]
-}
-
-interface CampaignPerformance {
-  id: string
-  name: string
-  platform: string
-  impressions: number
-  clicks: number
-  conversions: number
-  spent: number
-  startDate: string
-  endDate: string
-  status: 'active' | 'paused' | 'completed'
-}
 
 function AdPerformance() {
   const { t } = useTranslation()
   const { setShowSettingsDialog } = useConfigs()
-  const [loading, setLoading] = useState(true)
-  const [performanceData, setPerformanceData] = useState<AdPerformanceData | null>(null)
-  const [error, setError] = useState<string | null>(null)
-  
-  // Instagram State
-  const [isInstagramConnected, setIsInstagramConnected] = useState(false)
-  const [instagramData, setInstagramData] = useState<InstagramMedia[]>([])
+  const { invalidateMedia } = useInvalidateInstagram()
 
-  useEffect(() => {
-    loadPerformanceData()
-  }, [])
+  // React Query Hooks
+  const {
+    data: statusData,
+    isLoading: isStatusLoading,
+    error: statusError
+  } = useInstagramStatus()
 
-  const loadPerformanceData = async () => {
-    try {
-      setLoading(true)
-      setError(null)
+  const isInstagramConnected = statusData?.connected && statusData?.valid
 
-      // 1. Check Instagram Connection
-      try {
-        const status = await getInstagramStatus()
-        if (status.connected && status.valid) {
-          setIsInstagramConnected(true)
-          const mediaResponse = await getInstagramMedia(50) // Fetch recent 50 posts
-          setInstagramData(mediaResponse.data.data)
-        } else {
-          setIsInstagramConnected(false)
-        }
-      } catch (e) {
-        console.warn('Instagram connection check failed:', e)
-        setIsInstagramConnected(false)
-      }
+  const {
+    data: mediaResponse,
+    isLoading: isMediaLoading,
+    error: mediaError,
+    refetch: refetchMedia,
+    isFetching: isMediaFetching
+  } = useInstagramMedia(50, undefined, isInstagramConnected ?? false)
 
-      // 2. Load Ad Performance Mock Data (Always load for now or optional?)
-      // If we want to show ONLY Instagram data when connected, we can skip this.
-      // But let's load it as fallback or side-by-side if needed.
-      const data = await getAdPerformance()
-      setPerformanceData(data)
-      
-    } catch (err: any) {
-      console.error('Failed to load ad performance data:', err)
-      setError(err.message || '광고 성과 데이터를 불러오는데 실패했습니다')
-    } finally {
-      setLoading(false)
+  const {
+    data: performanceData,
+    isLoading: isPerformanceLoading,
+    error: performanceError
+  } = useAdPerformance(!isInstagramConnected)
+
+  // Combined loading and error states
+  const isLoading = isStatusLoading || (isInstagramConnected && isMediaLoading) || (!isInstagramConnected && isPerformanceLoading)
+  const error = statusError || (isInstagramConnected && mediaError) || (!isInstagramConnected && performanceError)
+
+  // Instagram data
+  const instagramData = mediaResponse?.data?.data ?? []
+
+  // Calculate Instagram aggregates
+  const { totalLikes, totalComments, totalPosts, avgLikes } = useMemo(() => {
+    const posts = instagramData
+    const likes = posts.reduce((acc, post) => acc + (post.like_count || 0), 0)
+    const comments = posts.reduce((acc, post) => acc + (post.comments_count || 0), 0)
+    const count = posts.length
+    return {
+      totalLikes: likes,
+      totalComments: comments,
+      totalPosts: count,
+      avgLikes: count > 0 ? Math.round(likes / count) : 0,
     }
-  }
+  }, [instagramData])
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('ko-KR').format(num)
@@ -104,11 +79,10 @@ function AdPerformance() {
     return `${num.toFixed(2)}%`
   }
 
-  // Calculate Instagram aggregates
-  const totalLikes = instagramData.reduce((acc, post) => acc + (post.like_count || 0), 0)
-  const totalComments = instagramData.reduce((acc, post) => acc + (post.comments_count || 0), 0)
-  const totalPosts = instagramData.length
-  const avgLikes = totalPosts > 0 ? Math.round(totalLikes / totalPosts) : 0
+  const handleRefresh = () => {
+    refetchMedia()
+    invalidateMedia()
+  }
 
   return (
     <div className="flex flex-col w-screen h-screen">
@@ -127,8 +101,8 @@ function AdPerformance() {
                 <div className="flex items-center gap-3 mb-2">
                   <TrendingUp className="w-8 h-8 text-primary" />
                   <h1 className="text-3xl font-bold">
-                    {isInstagramConnected 
-                      ? t('canvas:instagramPerformance', 'Instagram Performance') 
+                    {isInstagramConnected
+                      ? t('canvas:instagramPerformance', 'Instagram Performance')
                       : t('canvas:adPerformance', '광고 성과 분석')}
                   </h1>
                 </div>
@@ -138,19 +112,32 @@ function AdPerformance() {
                     : t('canvas:adPerformanceDescription', '실행한 광고 캠페인의 성과를 확인하고 분석하세요')}
                 </p>
               </div>
-              {!loading && !isInstagramConnected && (
-                <Button 
-                  onClick={() => setShowSettingsDialog(true)}
-                  className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
-                >
-                  <Instagram className="mr-2 h-4 w-4" />
-                  {t('canvas:connectInstagram', 'Connect Instagram')}
-                </Button>
-              )}
+              <div className="flex items-center gap-2">
+                {!isLoading && isInstagramConnected && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleRefresh}
+                    disabled={isMediaFetching}
+                  >
+                    <RefreshCw className={`h-4 w-4 mr-2 ${isMediaFetching ? 'animate-spin' : ''}`} />
+                    {t('canvas:refresh', 'Refresh')}
+                  </Button>
+                )}
+                {!isLoading && !isInstagramConnected && (
+                  <Button
+                    onClick={() => setShowSettingsDialog(true)}
+                    className="bg-gradient-to-r from-purple-500 to-pink-500 text-white"
+                  >
+                    <Instagram className="mr-2 h-4 w-4" />
+                    {t('canvas:connectInstagram', 'Connect Instagram')}
+                  </Button>
+                )}
+              </div>
             </div>
           </motion.div>
 
-          {loading ? (
+          {isLoading ? (
             <div className="flex items-center justify-center py-20">
               <Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
             </div>
@@ -158,7 +145,7 @@ function AdPerformance() {
             <Card className="p-6">
               <div className="text-center text-destructive">
                 <p className="text-lg font-semibold mb-2">오류 발생</p>
-                <p className="text-sm">{error}</p>
+                <p className="text-sm">{error.message || '데이터를 불러오는데 실패했습니다'}</p>
               </div>
             </Card>
           ) : isInstagramConnected ? (
@@ -213,8 +200,8 @@ function AdPerformance() {
                   </CardHeader>
                   <CardContent>
                     <div className="text-2xl font-bold">
-                      {totalPosts > 0 
-                        ? ((totalLikes + totalComments) / totalPosts).toFixed(1) 
+                      {totalPosts > 0
+                        ? ((totalLikes + totalComments) / totalPosts).toFixed(1)
                         : '0'}
                     </div>
                     <p className="text-xs text-muted-foreground mt-1">{t('canvas:avgInteractions', 'Avg. interactions per post')}</p>
@@ -244,9 +231,9 @@ function AdPerformance() {
                           <Card key={post.id} className="overflow-hidden">
                             <div className="aspect-square relative group">
                               {post.media_url ? (
-                                <img 
-                                  src={post.media_url} 
-                                  alt={post.caption || 'Instagram post'} 
+                                <img
+                                  src={post.media_url}
+                                  alt={post.caption || 'Instagram post'}
                                   className="object-cover w-full h-full"
                                 />
                               ) : (
@@ -271,9 +258,9 @@ function AdPerformance() {
                               </p>
                               <div className="flex justify-between items-center text-xs text-muted-foreground">
                                 <span>{new Date(post.timestamp).toLocaleDateString()}</span>
-                                <a 
-                                  href={post.permalink} 
-                                  target="_blank" 
+                                <a
+                                  href={post.permalink}
+                                  target="_blank"
                                   rel="noopener noreferrer"
                                   className="flex items-center gap-1 hover:text-primary"
                                 >
@@ -467,19 +454,18 @@ function AdPerformance() {
                                 <p className="text-sm text-muted-foreground">{campaign.platform}</p>
                               </div>
                               <span
-                                className={`px-2 py-1 rounded text-xs font-medium ${
-                                  campaign.status === 'active'
+                                className={`px-2 py-1 rounded text-xs font-medium ${campaign.status === 'active'
                                     ? 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'
                                     : campaign.status === 'paused'
-                                    ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
-                                    : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
-                                }`}
+                                      ? 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200'
+                                      : 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200'
+                                  }`}
                               >
                                 {campaign.status === 'active'
                                   ? '진행 중'
                                   : campaign.status === 'paused'
-                                  ? '일시정지'
-                                  : '완료'}
+                                    ? '일시정지'
+                                    : '완료'}
                               </span>
                             </div>
                             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -529,4 +515,3 @@ function AdPerformance() {
     </div>
   )
 }
-

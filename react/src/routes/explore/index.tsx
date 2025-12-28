@@ -18,7 +18,7 @@ import { useMutation } from '@tanstack/react-query'
 import { useConfigs } from '@/contexts/configs'
 import { DEFAULT_SYSTEM_PROMPT } from '@/constants'
 
-export const Route = createFileRoute('/explore')({
+export const Route = createFileRoute('/explore/')({
   component: Explore,
 })
 

@@ -9,7 +9,9 @@ ollama
 httpx
 aiohttp
 gunicorn
-aiosqlite
+asyncpg
+sqlalchemy[asyncio]>=2.0.0
+psycopg2-binary
 requests
 Pillow
 nanoid

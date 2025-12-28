@@ -29,8 +29,12 @@ print('Importing config_service')
 from services.config_service import config_service
 print('Importing tool_service')
 from services.tool_service import tool_service
+print('Importing db_service')
+from services.db_service import db_service, DatabaseConnection
 
 async def initialize():
+    print('Initializing database')
+    await db_service.init()
     print('Initializing config_service')
     await config_service.initialize()
     print('Initializing broadcast_init_done')
@@ -46,6 +50,8 @@ async def lifespan(app: FastAPI):
     await tool_service.initialize()
     yield
     # onshutdown
+    print('Closing database connection')
+    await DatabaseConnection.close()
 
 print('Creating FastAPI app')
 app = FastAPI(

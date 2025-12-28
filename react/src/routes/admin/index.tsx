@@ -11,7 +11,7 @@ import AdminSidebar, { AdminSidebarType } from '@/components/admin/AdminSidebar'
 import UserManagement from '@/components/admin/UserManagement'
 import TemplateManagement from '@/components/admin/TemplateManagement'
 
-export const Route = createFileRoute('/admin')({
+export const Route = createFileRoute('/admin/')({
   component: Admin,
 })
 

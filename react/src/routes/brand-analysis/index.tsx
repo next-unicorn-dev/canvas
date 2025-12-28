@@ -13,7 +13,7 @@ import { toast } from 'sonner'
 import { getBrandInfo, saveBrandInfo, BrandInfoExtraction } from '@/api/brand'
 import BrandChat from '@/components/brand/BrandChat'
 
-export const Route = createFileRoute('/brand-analysis')({
+export const Route = createFileRoute('/brand-analysis/')({
   component: BrandAnalysis,
 })
 

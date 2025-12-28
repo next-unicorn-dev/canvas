@@ -16,17 +16,24 @@ PBKDF2_ITERATIONS = 120_000
 
 
 def _utcnow() -> datetime:
-    return datetime.now(timezone.utc)
+    """Get current UTC time as timezone-naive datetime (for PostgreSQL compatibility)."""
+    return datetime.utcnow()
 
 
 def _format_timestamp(value: datetime) -> str:
-    return value.astimezone(timezone.utc).isoformat()
+    """Format datetime to ISO string (timezone-naive, assumed UTC)."""
+    return value.isoformat()
 
 
 def _parse_timestamp(value: str) -> datetime:
+    """Parse ISO timestamp string to timezone-naive datetime."""
     if value.endswith("Z"):
         value = value[:-1] + "+00:00"
-    return datetime.fromisoformat(value)
+    dt = datetime.fromisoformat(value)
+    # Remove timezone info for PostgreSQL compatibility
+    if dt.tzinfo is not None:
+        dt = dt.replace(tzinfo=None)
+    return dt
 
 
 def hash_password(password: str) -> str:

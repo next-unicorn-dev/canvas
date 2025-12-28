@@ -4,9 +4,11 @@ from langchain_core.tools import tool
 from services.instagram_service import instagram_service
 from services.s3_service import s3_service
 from services.config_service import FILES_DIR
-from services.db_service import DB_PATH
+from services.db_service import db_service
+from services.database.connection import get_db_session
+from services.database.models import InstagramToken
+from sqlalchemy import select
 import os
-import aiosqlite
 
 class UploadToInstagramInput(BaseModel):
     image_url: str = Field(description="The URL or local path of the image to upload. If it's a local file, it will be uploaded to S3 first.")
@@ -50,12 +52,12 @@ async def upload_to_instagram(image_url: str, caption: str, hashtags: Optional[s
 
         # 2. Find a user with Instagram token
         user_id = None
-        async with aiosqlite.connect(DB_PATH) as db:
-            db.row_factory = aiosqlite.Row
-            cursor = await db.execute("SELECT user_id FROM instagram_tokens LIMIT 1")
-            row = await cursor.fetchone()
+        async with get_db_session() as session:
+            stmt = select(InstagramToken.user_id).limit(1)
+            result = await session.execute(stmt)
+            row = result.first()
             if row:
-                user_id = row["user_id"]
+                user_id = row[0]
         
         if not user_id:
             return "No Instagram account connected. Please connect Instagram in Settings first."

@@ -8,8 +8,7 @@ import os
 import httpx
 from typing import Optional, Dict, Any
 from datetime import datetime, timedelta
-import aiosqlite
-from services.db_service import DB_PATH
+from services.db_service import db_service
 
 
 class InstagramService:
@@ -28,8 +27,8 @@ class InstagramService:
         
     def get_authorization_url(self, state: str) -> str:
         """Instagram(Facebook) OAuth 인증 URL 생성"""
-        # Graph API 사용을 위한 스코프
-        scopes = "instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement"
+        # Graph API 사용을 위한 스코프 (instagram_manage_insights 추가로 좋아요/댓글 수 조회 가능)
+        scopes = "instagram_basic,instagram_content_publish,pages_show_list,pages_read_engagement,instagram_manage_insights"
         return (
             f"{self.OAUTH_URL}"
             f"?client_id={self.app_id}"
@@ -135,48 +134,23 @@ class InstagramService:
         if expires_in:
             expires_at = (datetime.utcnow() + timedelta(seconds=expires_in)).isoformat()
         
-        async with aiosqlite.connect(DB_PATH) as db:
-            await db.execute(
-                """
-                INSERT OR REPLACE INTO instagram_tokens 
-                (user_id, access_token, expires_in, expires_at, refresh_token, 
-                 instagram_user_id, instagram_username, updated_at)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                (
-                    user_id,
-                    access_token,
-                    expires_in,
-                    expires_at,
-                    refresh_token,
-                    instagram_user_id,
-                    instagram_username,
-                    datetime.utcnow().isoformat(),
-                ),
-            )
-            await db.commit()
+        await db_service.save_instagram_token(
+            user_id=user_id,
+            access_token=access_token,
+            expires_in=expires_in,
+            expires_at=expires_at,
+            refresh_token=refresh_token,
+            instagram_user_id=instagram_user_id,
+            instagram_username=instagram_username,
+        )
     
     async def get_token(self, user_id: str) -> Optional[Dict[str, Any]]:
         """사용자의 Instagram 토큰 가져오기"""
-        async with aiosqlite.connect(DB_PATH) as db:
-            db.row_factory = aiosqlite.Row
-            cursor = await db.execute(
-                "SELECT * FROM instagram_tokens WHERE user_id = ?",
-                (user_id,),
-            )
-            row = await cursor.fetchone()
-            if row:
-                return dict(row)
-            return None
+        return await db_service.get_instagram_token(user_id)
     
     async def delete_token(self, user_id: str) -> None:
         """사용자의 Instagram 토큰 삭제"""
-        async with aiosqlite.connect(DB_PATH) as db:
-            await db.execute(
-                "DELETE FROM instagram_tokens WHERE user_id = ?",
-                (user_id,),
-            )
-            await db.commit()
+        await db_service.delete_instagram_token(user_id)
     
     async def is_token_valid(self, user_id: str) -> bool:
         """토큰이 유효한지 확인"""
@@ -304,6 +278,38 @@ class InstagramService:
         result = await self.publish_media(access_token, creation_id, ig_user_id)
         return result
     
+    async def get_media_insights(
+        self,
+        media_id: str,
+        access_token: str,
+    ) -> Dict[str, int]:
+        """특정 미디어의 Insights 가져오기 (좋아요, 댓글 수 등)"""
+        try:
+            async with httpx.AsyncClient() as client:
+                # IMAGE와 VIDEO 미디어에 대한 insights
+                response = await client.get(
+                    f"{self.BASE_URL}/{media_id}/insights",
+                    params={
+                        "metric": "likes,comments",
+                        "access_token": access_token,
+                    },
+                )
+                
+                if response.status_code == 200:
+                    data = response.json()
+                    insights = {}
+                    for item in data.get("data", []):
+                        name = item.get("name")
+                        values = item.get("values", [])
+                        if values:
+                            insights[name] = values[0].get("value", 0)
+                    return insights
+                    
+        except Exception as e:
+            print(f"Failed to get insights for media {media_id}: {e}")
+        
+        return {}
+
     async def get_user_media(
         self,
         user_id: str,
@@ -336,7 +342,61 @@ class InstagramService:
                 params=params,
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            
+            # like_count가 없는 미디어에 대해 Insights API로 보완
+            media_list = result.get("data", [])
+            for media in media_list:
+                # like_count가 없거나 None인 경우 Insights로 보완 시도
+                if media.get("like_count") is None:
+                    # CAROUSEL_ALBUM은 insights를 지원하지 않으므로 개별 미디어 조회 시도
+                    if media.get("media_type") == "CAROUSEL_ALBUM":
+                        # 캐러셀의 경우 개별 미디어 조회로 like_count 가져오기
+                        try:
+                            detail_response = await client.get(
+                                f"{self.BASE_URL}/{media['id']}",
+                                params={
+                                    "fields": "like_count,comments_count",
+                                    "access_token": access_token,
+                                },
+                            )
+                            if detail_response.status_code == 200:
+                                detail_data = detail_response.json()
+                                media["like_count"] = detail_data.get("like_count", 0)
+                                if media.get("comments_count") is None:
+                                    media["comments_count"] = detail_data.get("comments_count", 0)
+                        except Exception as e:
+                            print(f"Failed to get details for carousel {media['id']}: {e}")
+                            media["like_count"] = 0
+                    else:
+                        # IMAGE/VIDEO의 경우 Insights API 사용 시도
+                        insights = await self.get_media_insights(media["id"], access_token)
+                        if insights:
+                            media["like_count"] = insights.get("likes", 0)
+                            if media.get("comments_count") is None:
+                                media["comments_count"] = insights.get("comments", 0)
+                        else:
+                            # Insights API 실패 시 개별 미디어 조회로 폴백
+                            try:
+                                detail_response = await client.get(
+                                    f"{self.BASE_URL}/{media['id']}",
+                                    params={
+                                        "fields": "like_count,comments_count",
+                                        "access_token": access_token,
+                                    },
+                                )
+                                if detail_response.status_code == 200:
+                                    detail_data = detail_response.json()
+                                    media["like_count"] = detail_data.get("like_count", 0)
+                                    if media.get("comments_count") is None:
+                                        media["comments_count"] = detail_data.get("comments_count", 0)
+                                else:
+                                    media["like_count"] = 0
+                            except Exception as e:
+                                print(f"Failed to get details for media {media['id']}: {e}")
+                                media["like_count"] = 0
+            
+            return result
     
     async def get_media_details(
         self,

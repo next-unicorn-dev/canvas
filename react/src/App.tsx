@@ -6,6 +6,7 @@ import { ConfigsProvider } from '@/contexts/configs'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { useTheme } from '@/hooks/use-theme'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { PersistQueryClientProvider } from '@tanstack/react-query-persist-client'
 import { createAsyncStoragePersister } from '@tanstack/query-async-storage-persister'
 import { openDB } from 'idb'
@@ -106,6 +107,7 @@ function App() {
             </div>
           </ConfigsProvider>
         </AuthProvider>
+        <ReactQueryDevtools initialIsOpen={false} />
       </PersistQueryClientProvider>
       <Toaster position="bottom-center" richColors />
     </ThemeProvider>

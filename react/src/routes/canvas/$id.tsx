@@ -3,7 +3,6 @@ import CanvasExcali from '@/components/canvas/CanvasExcali'
 import CanvasHeader from '@/components/canvas/CanvasHeader'
 import CanvasMenu from '@/components/canvas/menu'
 import CanvasPopbarWrapper from '@/components/canvas/pop-bar'
-// VideoCanvasOverlay removed - using native Excalidraw embeddable elements instead
 import ChatInterface from '@/components/chat/Chat'
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable'
 import { CanvasProvider } from '@/contexts/canvas'
@@ -23,7 +22,6 @@ function Canvas() {
   const [error, setError] = useState<Error | null>(null)
   const [canvasName, setCanvasName] = useState('')
   const [sessionList, setSessionList] = useState<Session[]>([])
-  // initialVideos removed - using native Excalidraw embeddable elements instead
   const search = useSearch({ from: '/canvas/$id' }) as {
     sessionId: string
   }
@@ -40,7 +38,6 @@ function Canvas() {
           setCanvas(data)
           setCanvasName(data.name)
           setSessionList(data.sessions)
-          // Video elements now handled by native Excalidraw embeddable elements
         }
       } catch (err) {
         if (mounted) {

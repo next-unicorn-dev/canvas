@@ -9,55 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as KnowledgeRouteImport } from './routes/knowledge'
-import { Route as ExploreRouteImport } from './routes/explore'
-import { Route as BrandAnalysisRouteImport } from './routes/brand-analysis'
-import { Route as AssetsRouteImport } from './routes/assets'
-import { Route as Agent_studioRouteImport } from './routes/agent_studio'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as AdPerformanceRouteImport } from './routes/ad-performance'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as CanvasIdRouteImport } from './routes/canvas.$id'
-import { Route as AdminTemplateAddRouteImport } from './routes/admin.template.add'
+import { Route as KnowledgeIndexRouteImport } from './routes/knowledge/index'
+import { Route as ExploreIndexRouteImport } from './routes/explore/index'
+import { Route as CanvasIndexRouteImport } from './routes/canvas/index'
+import { Route as BrandAnalysisIndexRouteImport } from './routes/brand-analysis/index'
+import { Route as AssetsIndexRouteImport } from './routes/assets/index'
+import { Route as AgentStudioIndexRouteImport } from './routes/agent-studio/index'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdPerformanceIndexRouteImport } from './routes/ad-performance/index'
+import { Route as CanvasIdRouteImport } from './routes/canvas/$id'
+import { Route as AdminTemplateAddRouteImport } from './routes/admin/template.add'
 
-const KnowledgeRoute = KnowledgeRouteImport.update({
-  id: '/knowledge',
-  path: '/knowledge',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExploreRoute = ExploreRouteImport.update({
-  id: '/explore',
-  path: '/explore',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const BrandAnalysisRoute = BrandAnalysisRouteImport.update({
-  id: '/brand-analysis',
-  path: '/brand-analysis',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AssetsRoute = AssetsRouteImport.update({
-  id: '/assets',
-  path: '/assets',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const Agent_studioRoute = Agent_studioRouteImport.update({
-  id: '/agent_studio',
-  path: '/agent_studio',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRoute = AdminRouteImport.update({
-  id: '/admin',
-  path: '/admin',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdPerformanceRoute = AdPerformanceRouteImport.update({
-  id: '/ad-performance',
-  path: '/ad-performance',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KnowledgeIndexRoute = KnowledgeIndexRouteImport.update({
+  id: '/knowledge/',
+  path: '/knowledge/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExploreIndexRoute = ExploreIndexRouteImport.update({
+  id: '/explore/',
+  path: '/explore/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CanvasIndexRoute = CanvasIndexRouteImport.update({
+  id: '/canvas/',
+  path: '/canvas/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const BrandAnalysisIndexRoute = BrandAnalysisIndexRouteImport.update({
+  id: '/brand-analysis/',
+  path: '/brand-analysis/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AssetsIndexRoute = AssetsIndexRouteImport.update({
+  id: '/assets/',
+  path: '/assets/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AgentStudioIndexRoute = AgentStudioIndexRouteImport.update({
+  id: '/agent-studio/',
+  path: '/agent-studio/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminIndexRoute = AdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdPerformanceIndexRoute = AdPerformanceIndexRouteImport.update({
+  id: '/ad-performance/',
+  path: '/ad-performance/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const CanvasIdRoute = CanvasIdRouteImport.update({
@@ -66,155 +72,170 @@ const CanvasIdRoute = CanvasIdRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminTemplateAddRoute = AdminTemplateAddRouteImport.update({
-  id: '/template/add',
-  path: '/template/add',
-  getParentRoute: () => AdminRoute,
+  id: '/admin/template/add',
+  path: '/admin/template/add',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/ad-performance': typeof AdPerformanceRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/agent_studio': typeof Agent_studioRoute
-  '/assets': typeof AssetsRoute
-  '/brand-analysis': typeof BrandAnalysisRoute
-  '/explore': typeof ExploreRoute
-  '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
+  '/ad-performance': typeof AdPerformanceIndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/agent-studio': typeof AgentStudioIndexRoute
+  '/assets': typeof AssetsIndexRoute
+  '/brand-analysis': typeof BrandAnalysisIndexRoute
+  '/canvas': typeof CanvasIndexRoute
+  '/explore': typeof ExploreIndexRoute
+  '/knowledge': typeof KnowledgeIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/ad-performance': typeof AdPerformanceRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/agent_studio': typeof Agent_studioRoute
-  '/assets': typeof AssetsRoute
-  '/brand-analysis': typeof BrandAnalysisRoute
-  '/explore': typeof ExploreRoute
-  '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
+  '/ad-performance': typeof AdPerformanceIndexRoute
+  '/admin': typeof AdminIndexRoute
+  '/agent-studio': typeof AgentStudioIndexRoute
+  '/assets': typeof AssetsIndexRoute
+  '/brand-analysis': typeof BrandAnalysisIndexRoute
+  '/canvas': typeof CanvasIndexRoute
+  '/explore': typeof ExploreIndexRoute
+  '/knowledge': typeof KnowledgeIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
-  '/ad-performance': typeof AdPerformanceRoute
-  '/admin': typeof AdminRouteWithChildren
-  '/agent_studio': typeof Agent_studioRoute
-  '/assets': typeof AssetsRoute
-  '/brand-analysis': typeof BrandAnalysisRoute
-  '/explore': typeof ExploreRoute
-  '/knowledge': typeof KnowledgeRoute
   '/canvas/$id': typeof CanvasIdRoute
+  '/ad-performance/': typeof AdPerformanceIndexRoute
+  '/admin/': typeof AdminIndexRoute
+  '/agent-studio/': typeof AgentStudioIndexRoute
+  '/assets/': typeof AssetsIndexRoute
+  '/brand-analysis/': typeof BrandAnalysisIndexRoute
+  '/canvas/': typeof CanvasIndexRoute
+  '/explore/': typeof ExploreIndexRoute
+  '/knowledge/': typeof KnowledgeIndexRoute
   '/admin/template/add': typeof AdminTemplateAddRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/canvas/$id'
     | '/ad-performance'
     | '/admin'
-    | '/agent_studio'
+    | '/agent-studio'
     | '/assets'
     | '/brand-analysis'
+    | '/canvas'
     | '/explore'
     | '/knowledge'
-    | '/canvas/$id'
     | '/admin/template/add'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/canvas/$id'
     | '/ad-performance'
     | '/admin'
-    | '/agent_studio'
+    | '/agent-studio'
     | '/assets'
     | '/brand-analysis'
+    | '/canvas'
     | '/explore'
     | '/knowledge'
-    | '/canvas/$id'
     | '/admin/template/add'
   id:
     | '__root__'
     | '/'
-    | '/ad-performance'
-    | '/admin'
-    | '/agent_studio'
-    | '/assets'
-    | '/brand-analysis'
-    | '/explore'
-    | '/knowledge'
     | '/canvas/$id'
+    | '/ad-performance/'
+    | '/admin/'
+    | '/agent-studio/'
+    | '/assets/'
+    | '/brand-analysis/'
+    | '/canvas/'
+    | '/explore/'
+    | '/knowledge/'
     | '/admin/template/add'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
-  AdPerformanceRoute: typeof AdPerformanceRoute
-  AdminRoute: typeof AdminRouteWithChildren
-  Agent_studioRoute: typeof Agent_studioRoute
-  AssetsRoute: typeof AssetsRoute
-  BrandAnalysisRoute: typeof BrandAnalysisRoute
-  ExploreRoute: typeof ExploreRoute
-  KnowledgeRoute: typeof KnowledgeRoute
   CanvasIdRoute: typeof CanvasIdRoute
+  AdPerformanceIndexRoute: typeof AdPerformanceIndexRoute
+  AdminIndexRoute: typeof AdminIndexRoute
+  AgentStudioIndexRoute: typeof AgentStudioIndexRoute
+  AssetsIndexRoute: typeof AssetsIndexRoute
+  BrandAnalysisIndexRoute: typeof BrandAnalysisIndexRoute
+  CanvasIndexRoute: typeof CanvasIndexRoute
+  ExploreIndexRoute: typeof ExploreIndexRoute
+  KnowledgeIndexRoute: typeof KnowledgeIndexRoute
+  AdminTemplateAddRoute: typeof AdminTemplateAddRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/knowledge': {
-      id: '/knowledge'
-      path: '/knowledge'
-      fullPath: '/knowledge'
-      preLoaderRoute: typeof KnowledgeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/explore': {
-      id: '/explore'
-      path: '/explore'
-      fullPath: '/explore'
-      preLoaderRoute: typeof ExploreRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/brand-analysis': {
-      id: '/brand-analysis'
-      path: '/brand-analysis'
-      fullPath: '/brand-analysis'
-      preLoaderRoute: typeof BrandAnalysisRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/assets': {
-      id: '/assets'
-      path: '/assets'
-      fullPath: '/assets'
-      preLoaderRoute: typeof AssetsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/agent_studio': {
-      id: '/agent_studio'
-      path: '/agent_studio'
-      fullPath: '/agent_studio'
-      preLoaderRoute: typeof Agent_studioRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ad-performance': {
-      id: '/ad-performance'
-      path: '/ad-performance'
-      fullPath: '/ad-performance'
-      preLoaderRoute: typeof AdPerformanceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/': {
       id: '/'
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/knowledge/': {
+      id: '/knowledge/'
+      path: '/knowledge'
+      fullPath: '/knowledge'
+      preLoaderRoute: typeof KnowledgeIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/explore/': {
+      id: '/explore/'
+      path: '/explore'
+      fullPath: '/explore'
+      preLoaderRoute: typeof ExploreIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/canvas/': {
+      id: '/canvas/'
+      path: '/canvas'
+      fullPath: '/canvas'
+      preLoaderRoute: typeof CanvasIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/brand-analysis/': {
+      id: '/brand-analysis/'
+      path: '/brand-analysis'
+      fullPath: '/brand-analysis'
+      preLoaderRoute: typeof BrandAnalysisIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/assets/': {
+      id: '/assets/'
+      path: '/assets'
+      fullPath: '/assets'
+      preLoaderRoute: typeof AssetsIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/agent-studio/': {
+      id: '/agent-studio/'
+      path: '/agent-studio'
+      fullPath: '/agent-studio'
+      preLoaderRoute: typeof AgentStudioIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ad-performance/': {
+      id: '/ad-performance/'
+      path: '/ad-performance'
+      fullPath: '/ad-performance'
+      preLoaderRoute: typeof AdPerformanceIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/canvas/$id': {
@@ -226,34 +247,26 @@ declare module '@tanstack/react-router' {
     }
     '/admin/template/add': {
       id: '/admin/template/add'
-      path: '/template/add'
+      path: '/admin/template/add'
       fullPath: '/admin/template/add'
       preLoaderRoute: typeof AdminTemplateAddRouteImport
-      parentRoute: typeof AdminRoute
+      parentRoute: typeof rootRouteImport
     }
   }
 }
 
-interface AdminRouteChildren {
-  AdminTemplateAddRoute: typeof AdminTemplateAddRoute
-}
-
-const AdminRouteChildren: AdminRouteChildren = {
-  AdminTemplateAddRoute: AdminTemplateAddRoute,
-}
-
-const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)
-
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
-  AdPerformanceRoute: AdPerformanceRoute,
-  AdminRoute: AdminRouteWithChildren,
-  Agent_studioRoute: Agent_studioRoute,
-  AssetsRoute: AssetsRoute,
-  BrandAnalysisRoute: BrandAnalysisRoute,
-  ExploreRoute: ExploreRoute,
-  KnowledgeRoute: KnowledgeRoute,
   CanvasIdRoute: CanvasIdRoute,
+  AdPerformanceIndexRoute: AdPerformanceIndexRoute,
+  AdminIndexRoute: AdminIndexRoute,
+  AgentStudioIndexRoute: AgentStudioIndexRoute,
+  AssetsIndexRoute: AssetsIndexRoute,
+  BrandAnalysisIndexRoute: BrandAnalysisIndexRoute,
+  CanvasIndexRoute: CanvasIndexRoute,
+  ExploreIndexRoute: ExploreIndexRoute,
+  KnowledgeIndexRoute: KnowledgeIndexRoute,
+  AdminTemplateAddRoute: AdminTemplateAddRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

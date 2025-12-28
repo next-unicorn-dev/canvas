@@ -1,29 +1,45 @@
-from fastapi import APIRouter, Request
+from fastapi import APIRouter, Request, Header
+from typing import List, Optional
 #from routers.agent import chat
 from services.chat_service import handle_chat
 from services.db_service import db_service
+from services.auth_service import auth_service
 import asyncio
 import json
 from models.dto import (
     CanvasInfo, CreateCanvasRequest, CreateCanvasResponse,
     GetCanvasResponse, SaveCanvasRequest, RenameCanvasRequest, CanvasIdResponse
 )
-from typing import List
 
 router = APIRouter(prefix="/api/canvas", tags=["Canvas"])
 
+
+async def _get_user_id_from_token(authorization: Optional[str]) -> Optional[str]:
+    """Extract user_id from authorization header. Returns None if not authenticated."""
+    if not authorization:
+        return None
+    try:
+        token = auth_service.extract_token_from_header(authorization)
+        user = await auth_service.validate_token(token)
+        return user.get("id")
+    except Exception:
+        return None
+
+
 @router.get("/list", response_model=List[CanvasInfo], summary="캔버스 목록 조회")
-async def list_canvases():
+async def list_canvases(authorization: Optional[str] = Header(None)):
     """
-    모든 캔버스 목록을 조회합니다.
+    로그인한 사용자의 캔버스 목록을 조회합니다.
 
     Returns:
         List[CanvasInfo]: 캔버스 정보 목록
     """
-    return await db_service.list_canvases()
+    user_id = await _get_user_id_from_token(authorization)
+    return await db_service.list_canvases(user_id)
+
 
 @router.post("/create", response_model=CreateCanvasResponse, summary="캔버스 생성")
-async def create_canvas(request: CreateCanvasRequest):
+async def create_canvas(request: CreateCanvasRequest, authorization: Optional[str] = Header(None)):
     """
     새로운 캔버스를 생성합니다.
 
@@ -33,6 +49,8 @@ async def create_canvas(request: CreateCanvasRequest):
     Returns:
         CreateCanvasResponse: 생성된 캔버스 ID
     """
+    user_id = await _get_user_id_from_token(authorization)
+    
     data = request.dict()
     id = data.get('canvas_id')
     name = data.get('name')
@@ -54,7 +72,7 @@ async def create_canvas(request: CreateCanvasRequest):
                 ''
             )
 
-    await db_service.create_canvas(id, name)
+    await db_service.create_canvas(id, name, user_id)
     return CreateCanvasResponse(id=id)
 
 @router.get("/{id}", response_model=GetCanvasResponse, summary="캔버스 조회")
